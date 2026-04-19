@@ -1,0 +1,55 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployer": "0x1F4739e229AdCb1c986C8A8b66f686ddEc29694c",
+  "contracts": {
+    "DIDIdentityTokenV2": {
+      "address": "0x103eAd096f898132E138ad228E35296db983A053",
+      "tx": "0xa2c7c52684c507087c8a28251069d4f540ba8e3cf5d74379babf333b1395e6d1",
+      "block": 9789472
+    },
+    "DIDOwnershipV2": {
+      "address": "0xac5Ad1482d73d0E09ED3960C02EebF428Ad63722",
+      "tx": "0x94faaa8e6d5d927a875ef80abb74bacd167395f6905861efe46734ec4ffc9999",
+      "block": 10217383
+    },
+    "DIDRegistryV2": {
+      "address": "0x8e5F41f2B8B3E28a8966e37181B257f9E2725bA5",
+      "tx": "0xf28efd48c9d665af73c62be27a6205d966bfdd4d4c3bef4f959f95299c84ff9e",
+      "block": 10217385
+    },
+    "DIDMetadata": {
+      "proxy": "0x27965EE779822819729a662717eAC7360Eb7FCDF",
+      "implementation": "0xa6000DCc4c4e3dCf17DbD35C30BAB627A3B60e28",
+      "tx": "0xf746aad593bb6b8433fac85b96e92d50e8ec59f7c4bd0bb7d6cb92417232cdc4",
+      "block": 10205061
+    },
+    "DIDService": {
+      "proxy": "0x2E9058F31127C994f01099406ff3C85d87063627",
+      "implementation": "0x52223B023aa6C5B91c7027b2Ca2B0899a651F277",
+      "tx": "0x471ad1394eafceec9d83166a681208d0025bd5f5c83a2d0612865a79d05ac353",
+      "block": 10205064
+    },
+    "GovernanceTimelock": {
+      "address": "0xdD26Ade2e6432FE8356CedA5607C0b548fa5397B",
+      "tx": "0xd3749d03cd2b50c536fb97b5936307d157022bb3954b89e8a42cfa6792646de4",
+      "block": 10204584
+    }
+  },
+  "safes": {
+    "governanceSafe": "0x8644F9AaB59C411AAE7E397aDEAc44a1dc34fCb1",
+    "emergencySafe": "0x0F630ECB273c391554f88ad756f19a9e9c094983"
+  },
+  "timelockMinDelaySec": 3600,
+  "timestamp": "2026-02-08T12:21:03.126Z",
+  "migration": {
+    "scheduleBatchTxHash": "0x404bb983dd1a4feb57a6e3bd9c60cabc41bdb558a27d420e9c1cb1d2a46d8e9e",
+    "scheduleBatchBlock": 10217477,
+    "scheduleBatchTimestamp": "2026-02-08T12:33:48Z",
+    "executeBatchReadyAfter": "2026-02-08T13:33:48Z",
+    "executeBatchTxHash": "0xff64f2cf0daf3ec712419d2cceedd778c8e416d7e35f5a35b75a4c2266838efd",
+    "executeBatchBlock": 10218887,
+    "executeBatchTimestamp": "2026-02-08T17:26:48Z",
+    "details": "metadata-service-upgrade-proposal.json"
+  }
+}

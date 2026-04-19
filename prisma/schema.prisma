@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "darwin"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubscriptionTier {
+  FREE
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentMethod {
+  NONE
+  STRIPE
+  CRYPTO
+}
+
+enum RAGOperation {
+  INDEX
+  BATCH_INDEX
+  DELETE
+  QUERY
+}
+
+model EmailSubscription {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  fullName        String?
+  role            String?  // client, therapist, partner
+  ipHash          String?
+  consentGiven    Boolean  @default(false)
+  consentTimestamp DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("email_subscriptions")
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String
+  subject   String
+  message   String
+  ipHash    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contact_messages")
+}
+
+model Subscription {
+  id                   String            @id @default(cuid())
+  walletAddress        String            @unique
+  didTokenId           String?           @unique
+  tier                 SubscriptionTier  @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  paymentMethod        PaymentMethod     @default(NONE)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripePriceId        String?
+  cryptoPaymentTxHash  String?
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean           @default(false)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@map("subscriptions")
+}
+
+model EncryptedChat {
+  id                 String   @id @default(cuid())
+  walletAddress      String   @unique
+  encryptedBlob      String
+  encryptedBlobHash  String
+  didTokenId         String?
+  encryptedSummaryRef String? // IPFS CID or S3 key for encrypted chat summary
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("encrypted_chats")
+}

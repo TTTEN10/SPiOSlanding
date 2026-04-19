@@ -1,0 +1,30 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployer": "0x1F4739e229AdCb1c986C8A8b66f686ddEc29694c",
+  "contracts": {
+    "GovernanceTimelock": {
+      "address": "0xdD26Ade2e6432FE8356CedA5607C0b548fa5397B",
+      "tx": "0xd3749d03cd2b50c536fb97b5936307d157022bb3954b89e8a42cfa6792646de4",
+      "block": 10204584
+    },
+    "DIDMetadata": {
+      "proxy": "0x27965EE779822819729a662717eAC7360Eb7FCDF",
+      "implementation": "0xc4B9C49660DE3B658172D02b96AaA0933Fd2Ac18",
+      "tx": "0xf746aad593bb6b8433fac85b96e92d50e8ec59f7c4bd0bb7d6cb92417232cdc4",
+      "block": 10205061
+    },
+    "DIDService": {
+      "proxy": "0x2E9058F31127C994f01099406ff3C85d87063627",
+      "implementation": "0xbaB3EE6446415826f5B0fC779643570f34fFDd79",
+      "tx": "0x471ad1394eafceec9d83166a681208d0025bd5f5c83a2d0612865a79d05ac353",
+      "block": 10205064
+    }
+  },
+  "safes": {
+    "governanceSafe": "0x0000000000000000000000000000000000000000",
+    "emergencySafe": "0x0000000000000000000000000000000000000000"
+  },
+  "timelockMinDelaySec": 3600,
+  "timestamp": "2026-02-06T17:54:02.873Z"
+}

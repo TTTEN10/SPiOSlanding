@@ -1,0 +1,14 @@
+# Install on the APP server that runs /opt/spapp-monitor/monitor.sh:
+#   sudo cp deployment/logrotate-app-monitor.example /etc/logrotate.d/app-monitor
+#
+# Adjust the path if MONITOR_REMOTE_ROOT differs.
+
+/opt/spapp-monitor/logs/*.log {
+  weekly
+  rotate 8
+  compress
+  delaycompress
+  missingok
+  notifempty
+  copytruncate
+}

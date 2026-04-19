@@ -1,0 +1,13 @@
+---
+description: Deployment workflow rules
+globs: "{deployment/**/*.sh,deploy/**/*.yml,deploy/**/*.yaml,.github/workflows/**/*.yml,.github/workflows/**/*.yaml}"
+alwaysApply: false
+---
+
+# Deployment Workflow
+
+- Treat deployment as complete only after explicit health verification.
+- Confirm frontend, backend, and API endpoints are reachable post-deploy.
+- Require successful service-level health checks for all critical components.
+- Inspect logs for critical errors before closing a deployment task.
+- Keep rollback path clear before applying production changes.

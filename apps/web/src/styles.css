@@ -1,0 +1,505 @@
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600&family=Noto+Sans:wght@300&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Base font configuration - Secondary Font (Titillium Web Regular 400) for body text */
+  html {
+    font-family: 'Titillium Web', system-ui, sans-serif;
+    font-weight: 400; /* Secondary Font - Regular 400 */
+  }
+  
+  body {
+    font-family: 'Titillium Web', system-ui, sans-serif;
+    font-weight: 400; /* Secondary Font - Regular 400 for body text */
+    font-size: 1rem; /* 16px minimum for readability */
+    line-height: 1.6;
+  }
+  
+  body.light {
+    @apply bg-gradient-to-br from-purple-200 via-white to-green-200 min-h-screen;
+    color: #001515;
+  }
+  
+  body.dark {
+    @apply bg-gradient-to-br from-[#352c55] via-black to-[#0f4d33] min-h-screen;
+    color: #EAE8FF; /* light neutral for better contrast */
+  }
+  
+  /* Typography Hierarchy - Clear scale */
+  h1 {
+    font-size: 2.5rem; /* 40px */
+    line-height: 1.2;
+  }
+  
+  h2 {
+    font-size: 2rem; /* 32px */
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.4;
+  }
+  
+  h4 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.4;
+  }
+  
+  h5 {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.5;
+  }
+  
+  h6 {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5;
+  }
+  
+  @media (max-width: 640px) {
+    h1 {
+      font-size: 2rem; /* 32px on mobile */
+    }
+    
+    h2 {
+      font-size: 1.75rem; /* 28px on mobile */
+    }
+    
+    h3 {
+      font-size: 1.375rem; /* 22px on mobile */
+    }
+    
+    body {
+      font-size: 1rem; /* Maintain 16px minimum on mobile */
+    }
+  }
+  
+  /* Primary Font (Titillium Web SemiBold 600) - For headings, titles, and prominent text */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Titillium Web', sans-serif;
+    font-weight: 600; /* Primary Font - SemiBold 600 */
+    color: #000000; /* Maximum contrast for headings */
+  }
+  
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    color: #ffffff;
+  }
+  
+  /* Secondary Font (Titillium Web Regular 400) - For body text and detailed information */
+  p, span, div, li, td, th, label, input, textarea, select, button, a {
+    font-family: 'Titillium Web', sans-serif;
+    font-weight: 400; /* Secondary Font - Regular 400 */
+    color: #001515;
+  }
+  
+  .dark p, .dark span, .dark div, .dark li, .dark td, .dark th, .dark label {
+    color: #ffffff;
+  }
+  
+  /* Web Safe Font (Noto Sans Light 300) - For digital applications, iOS compatible */
+  .font-web-safe {
+    font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 300; /* Web Safe Font - Light 300 */
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white font-titillium font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-primary-500/25 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-95 transform;
+    position: relative;
+  }
+  
+  .btn-primary:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  .btn-primary.loading {
+    color: transparent;
+    pointer-events: none;
+  }
+  
+  .btn-primary.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-neutral-light text-text-primary font-titillium font-semibold py-3 px-6 rounded-lg border border-neutral-dark transition-all duration-300 shadow-sm hover:shadow-md hover:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-95 transform;
+    position: relative;
+  }
+  
+  .btn-secondary:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  .btn-secondary.loading {
+    color: transparent;
+    pointer-events: none;
+  }
+  
+  .btn-secondary.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  /* Shared "Try beta" CTA — same shape, font stack, and spacing everywhere */
+  .btn-try-beta {
+    @apply btn-primary inline-flex items-center justify-center gap-2 text-base sm:text-lg min-h-[44px] shrink-0;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 border border-neutral-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 font-titillium font-regular text-text-primary hover:border-primary-400/50;
+  }
+  
+  .input-field:invalid {
+    @apply border-red-300 dark:border-red-700;
+  }
+  
+  .input-field::placeholder {
+    @apply text-gray-400 dark:text-gray-500;
+    opacity: 0.7; /* Better contrast for placeholder text */
+  }
+  
+  /* Form error styling */
+  .form-error {
+    @apply mt-2 text-sm text-red-600 dark:text-red-400 flex items-start gap-2;
+  }
+  
+  .form-error-icon {
+    @apply w-4 h-4 flex-shrink-0 mt-0.5;
+  }
+  
+  .input-error {
+    @apply border-red-500 dark:border-red-600 focus:ring-red-500 focus:border-red-500;
+  }
+  
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .container-max {
+    @apply max-w-7xl mx-auto;
+  }
+  
+  .text-heading {
+    @apply font-titillium font-semibold text-text-primary dark:text-white;
+    /* Ensure WCAG AA contrast: 4.5:1 for normal text, 3:1 for large text */
+    color: #000000; /* Maximum contrast for headings */
+  }
+  
+  .dark .text-heading {
+    color: #ffffff;
+  }
+  
+  .text-body {
+    @apply font-titillium font-regular;
+    /* Ensure WCAG AA contrast: 4.5:1 minimum */
+    color: #001515; /* Dark enough for light mode (4.5:1 contrast on white) */
+  }
+  
+  .dark .text-body {
+    color: #EAE8FF; /* Light enough for dark mode */
+  }
+  
+  .text-web-safe {
+    @apply font-noto font-light text-text-primary dark:text-white;
+  }
+  
+  /* Ensure gradient text stays the same in both light and dark modes */
+  .bg-clip-text {
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  
+  .dark .bg-clip-text {
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.01];
+  }
+
+  /* Enhanced keyboard navigation */
+  *:focus-visible {
+    @apply outline-2 outline-primary-600 outline-offset-2 rounded;
+    outline-style: solid;
+    outline-width: 3px;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply ring-2 ring-primary-500 ring-offset-2;
+  }
+
+  /* Skip to main content link */
+  .skip-to-main {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-lg;
+  }
+
+  /* Smooth fade-in animation */
+  .fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  /* Stagger animation for lists */
+  .stagger-item {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  .stagger-item:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-item:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-item:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-item:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-item:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-item:nth-child(6) { animation-delay: 0.6s; }
+
+  /* Icon hover effect */
+  .icon-hover {
+    @apply transition-all duration-300 hover:scale-110 hover:rotate-3;
+  }
+
+  /* Link hover effect */
+  .link-hover {
+    @apply transition-all duration-200 hover:text-primary-600 relative;
+  }
+
+  .link-hover::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-300;
+  }
+
+  .link-hover:hover::after {
+    @apply w-full;
+  }
+
+  /* Footer: hover anywhere on the row (icon or label) applies link-hover to the label */
+  footer .group:hover .link-hover {
+    @apply text-primary-600;
+  }
+
+  footer .group:hover .link-hover::after {
+    @apply w-full;
+  }
+  
+  /* Confirmation animations */
+  .confirmation-check {
+    animation: checkMark 0.5s ease-in-out;
+  }
+  
+  @keyframes checkMark {
+    0% {
+      transform: scale(0);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  /* Progress bar */
+  .progress-bar {
+    @apply w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+  }
+  
+  .progress-bar-fill {
+    @apply h-full bg-gradient-to-r from-primary-600 to-secondary-600 transition-all duration-500;
+    animation: progressShimmer 6s infinite;
+  }
+  
+  @keyframes progressShimmer {
+    0% {
+      background-position: -100% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile-specific improvements */
+@layer utilities {
+  /* Screen reader only class for accessibility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .sr-only-focusable:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* Skip link styles */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #3B82F6;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: 100;
+    border-radius: 0 0 4px 0;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
+
+  /* Focus visible styles for better accessibility */
+  *:focus-visible {
+    outline: 2px solid #3B82F6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Prevent text overflow on mobile */
+  @media (max-width: 640px) {
+    * {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    
+    /* Ensure buttons are touch-friendly */
+    button, a {
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Improve scrolling on mobile */
+    body {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    * {
+      border-color: currentColor !important;
+    }
+  }
+}

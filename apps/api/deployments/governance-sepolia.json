@@ -1,0 +1,11 @@
+{
+  "network": "sepolia",
+  "blockNumber": 10205110,
+  "timestamp": 1770401040,
+  "rolesTransferred": {
+    "didRegistry": true,
+    "didOwnership": true,
+    "didMetadata": true,
+    "didService": true
+  }
+}

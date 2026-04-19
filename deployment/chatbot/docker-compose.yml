@@ -1,0 +1,67 @@
+services:
+  chatbot-api:
+    build:
+      context: ../../apps/ai-chatbot
+      dockerfile: Dockerfile
+    container_name: safepsy-chatbot-api
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:8000:8000"
+    environment:
+      # If set, chatbot proxies to this OpenAI-compatible base (vLLM); no in-process model.
+      VLLM_OPENAI_BASE_URL: "${VLLM_OPENAI_BASE_URL:-}"
+      UPSTREAM_OPENAI_API_KEY: "${UPSTREAM_OPENAI_API_KEY:-}"
+      # Default to CPU mode on lightweight instances.
+      USE_GPU: "${USE_GPU:-false}"
+      # Real replies on CPU (Hugging Face). Set USE_MOCK_RESPONSES=true only for tests.
+      USE_MOCK_RESPONSES: "${USE_MOCK_RESPONSES:-false}"
+      CPU_MODEL_NAME: "${CPU_MODEL_NAME:-Qwen/Qwen2.5-1.5B-Instruct}"
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      PORT: "8000"
+      AI_INTERNAL_API_KEY: "${AI_INTERNAL_API_KEY:-}"
+      # Session metadata (optional); same compose network as redis service
+      REDIS_URL: "${REDIS_URL:-redis://redis:6379/0}"
+      SESSION_METADATA_TTL_SEC: "${SESSION_METADATA_TTL_SEC:-86400}"
+      # MODEL_NAME is used only for GPU/vLLM or "proxy" display; keep it aligned with CPU default to avoid confusion.
+      MODEL_NAME: "${MODEL_NAME:-Qwen/Qwen2.5-1.5B-Instruct}"
+      # Only relevant when USE_GPU=true (local vLLM) or when proxying to vLLM.
+      VLLM_TOKENIZER_MODE: "${VLLM_TOKENIZER_MODE:-mistral}"
+      # Persist downloaded weights on the host volume (/data on VM)
+      HF_HOME: /app/data/hf
+      TRANSFORMERS_CACHE: /app/data/hf
+    volumes:
+      - /data:/app/data
+    depends_on:
+      - redis
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 600s
+
+  redis:
+    image: redis:7-alpine
+    container_name: safepsy-chatbot-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  redis-data:

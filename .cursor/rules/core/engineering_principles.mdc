@@ -1,0 +1,13 @@
+---
+description: Core engineering principles
+alwaysApply: true
+---
+
+# Engineering Principles
+
+- Prioritize production stability over speed of change.
+- Never break working infrastructure to deliver a feature.
+- Prefer minimal, reversible changes and small diffs.
+- Validate behavior before and after deploy.
+- Do not assume environment state; verify it directly.
+- Check running services before modifying configs or scripts.

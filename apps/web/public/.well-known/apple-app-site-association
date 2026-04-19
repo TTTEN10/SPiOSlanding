@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "<REAL_TEAM_ID>.com.safepsy.mobile",
+        "paths": ["*"]
+      }
+    ]
+  }
+}

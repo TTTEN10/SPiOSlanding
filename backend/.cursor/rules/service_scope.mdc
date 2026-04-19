@@ -1,0 +1,12 @@
+---
+description: Backend folder scoped coding guardrails
+globs: "**/*.{ts,js,json,yml,yaml,sh}"
+alwaysApply: false
+---
+
+# Backend Scoped Rule
+
+- Keep backend changes isolated from frontend/API concerns unless required.
+- Before changing deployment scripts, verify backend runtime assumptions.
+- For API surface changes, update contracts and compatibility notes.
+- Prefer incremental refactors that preserve existing behavior.

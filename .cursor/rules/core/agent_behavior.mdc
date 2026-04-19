@@ -1,0 +1,12 @@
+---
+description: AI agent behavior
+alwaysApply: true
+---
+
+# Agent Behavior
+
+- Think through dependencies and rollback implications before edits.
+- Prefer debugging and targeted fixes over full rebuild/redeploy.
+- Never assume system state; verify services, ports, and process health.
+- Verify running infrastructure before changing deployment artifacts.
+- Finish tasks fully: implement, validate, and report outcomes.

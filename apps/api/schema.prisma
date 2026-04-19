@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model EmailSubscription {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  fullName         String?
+  role             String? // client, therapist, partner
+  ipHash           String?
+  consentGiven     Boolean   @default(false)
+  consentTimestamp DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("email_subscriptions")
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String
+  subject   String
+  message   String
+  ipHash    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contact_messages")
+}
+
+model EncryptedChat {
+  id                String   @id @default(cuid())
+  walletAddress     String   @unique
+  didTokenId        String?
+  encryptedBlob     String // Encrypted chat history (JSON)
+  encryptedBlobHash String // SHA-256 hash for on-chain storage
+  encryptedKey      String? // Encrypted symmetric key (stored in DID)
+  encryptedSummaryRef String? // Storage reference (IPFS CID or S3 key) for encrypted chat summary
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([walletAddress])
+  @@index([didTokenId])
+  @@map("encrypted_chats")
+}
+
+model Subscription {
+  id                String            @id @default(cuid())
+  walletAddress     String            @unique
+  didTokenId        String?           @unique
+  tier              SubscriptionTier  @default(FREE)
+  status            SubscriptionStatus @default(ACTIVE)
+  paymentMethod     PaymentMethod     @default(NONE)
+  stripeCustomerId  String?
+  stripeSubscriptionId String?
+  stripePriceId     String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean          @default(false)
+  cryptoPaymentTxHash String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  payments          Payment[]
+
+  @@index([walletAddress])
+  @@index([didTokenId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Payment {
+  id                String            @id @default(cuid())
+  subscriptionId   String
+  subscription     Subscription       @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  walletAddress    String
+  didTokenId        String?
+  amount           Decimal            @db.Decimal(18, 8)
+  currency         String             @default("USD")
+  paymentMethod    PaymentMethod
+  status           PaymentStatus      @default(PENDING)
+  stripePaymentIntentId String?
+  cryptoTxHash     String?
+  cryptoBlockNumber BigInt?
+  metadata         String?            // JSON metadata
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([subscriptionId])
+  @@index([walletAddress])
+  @@index([status])
+  @@index([cryptoTxHash])
+  @@map("payments")
+}
+
+enum SubscriptionTier {
+  FREE
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PAST_DUE
+  TRIALING
+}
+
+enum PaymentMethod {
+  NONE
+  STRIPE
+  CRYPTO
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+model RAGAuditLog {
+  id              String   @id @default(cuid())
+  operation       RAGOperation
+  walletAddress   String?  // Wallet address if authenticated
+  documentId      String?
+  source          String?
+  documentSize    Int?     // Size in bytes
+  success         Boolean
+  errorMessage    String?
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+
+  @@index([operation])
+  @@index([walletAddress])
+  @@index([documentId])
+  @@index([source])
+  @@index([createdAt])
+  @@map("rag_audit_logs")
+}
+
+enum RAGOperation {
+  INDEX
+  DELETE
+  BATCH_INDEX
+}
+
+// ISO 27001 A.12.4.1 / 8.15: Security event audit trail (auth, access, critical actions)
+model SecurityAuditLog {
+  id          String   @id @default(cuid())
+  eventType   String   // e.g. AUTH_SUCCESS, AUTH_FAILURE, ACCESS_DENIED
+  actor       String?  // hashed or redacted identifier (e.g. wallet prefix 0x1234...abcd)
+  resource    String?  // endpoint or resource (e.g. /api/auth/wallet)
+  success     Boolean
+  ipAddress   String?
+  userAgent   String?
+  details     String?  // JSON; no PII or secrets
+  createdAt   DateTime @default(now())
+
+  @@index([eventType])
+  @@index([actor])
+  @@index([createdAt])
+  @@map("security_audit_logs")
+}

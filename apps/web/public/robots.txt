@@ -1,0 +1,47 @@
+# robots.txt for SafePsy
+User-agent: *
+Allow: /
+Disallow: /chat
+Disallow: /beta/chat
+Disallow: /app/
+Disallow: /500
+Disallow: /maintenance
+Disallow: /internal/admin/
+
+# Sitemap location
+Sitemap: https://safepsy.com/sitemap.xml
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1
+
+# Allow common search engine bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+User-agent: Sogou
+Allow: /
+
+User-agent: Exabot
+Allow: /
+
+User-agent: facebot
+Allow: /
+
+User-agent: ia_archiver
+Allow: /
+

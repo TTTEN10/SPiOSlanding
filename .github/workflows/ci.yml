@@ -1,0 +1,251 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ['*']
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18.x'
+  TERRAFORM_VERSION: '1.6.0'
+
+jobs:
+  # Job 1: Lint
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint frontend and backend
+        run: npm run lint
+
+  # Job 2: Typecheck
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+  # Job 3: Unit Tests
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test
+
+  # Job 4: Contract Tests (optional - continues on error)
+  test-contracts:
+    name: Contract Tests
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run contract tests
+        run: npm run test:contract
+
+  # Job 5: Build
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: Build API
+        run: npm run build:api
+
+      - name: Build Web
+        run: npm run build:web
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            apps/api/dist
+            apps/web/dist
+          retention-days: 1
+
+  # Job 6: Terraform Validate
+  terraform-validate:
+    name: Terraform Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: |
+            infra/terraform/.terraform
+            ~/.terraform.d/plugin-cache
+          key: ${{ runner.os }}-terraform-${{ hashFiles('infra/terraform/**/*.tf') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-
+
+      - name: Terraform Format Check
+        working-directory: infra/terraform
+        run: terraform fmt -check -recursive || (echo "::error::Terraform files are not formatted. Run 'terraform fmt -recursive' to fix." && exit 1)
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        working-directory: infra/terraform
+        run: terraform validate
+
+  # Job 7: Terraform Plan (only on main branch or with secrets)
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: |
+            infra/terraform/.terraform
+            ~/.terraform.d/plugin-cache
+          key: ${{ runner.os }}-terraform-${{ hashFiles('infra/terraform/**/*.tf') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        working-directory: infra/terraform
+        run: |
+          # Terraform plan may fail if credentials are not configured
+          # This is acceptable - we validate the configuration syntax in terraform-validate
+          terraform plan -input=false -out=tfplan || echo "::warning::Terraform plan requires credentials (expected if secrets not configured)"
+
+      - name: Cleanup plan file
+        if: always()
+        working-directory: infra/terraform
+        run: rm -f tfplan
+
+  # Final job: All checks passed (fail fast)
+  ci-success:
+    name: CI Status Check
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test, test-contracts, build, terraform-validate]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.lint.result }}" != "success" ] || \
+             [ "${{ needs.typecheck.result }}" != "success" ] || \
+             [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ] || \
+             [ "${{ needs.terraform-validate.result }}" != "success" ]; then
+            echo "::error::One or more required jobs failed"
+            exit 1
+          fi
+          # Contract tests are optional - warn if they fail but don't block
+          if [ "${{ needs.test-contracts.result }}" != "success" ]; then
+            echo "::warning::Contract tests failed (non-blocking)"
+          fi
+          echo "✅ All required CI checks passed!"
+

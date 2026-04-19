@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    
+    <!-- Primary Meta Tags -->
+    <title>SafePsy - Privacy-First Online Therapy Platform</title>
+    <meta name="title" content="SafePsy - Privacy-First Online Therapy Platform" />
+    <meta name="description" content="Revolutionizing online therapy with privacy-first technology. Secure, ethical, and human-centered mental health support using blockchain and digital identity." />
+    <meta name="keywords" content="online therapy, mental health, privacy, blockchain, digital identity, counseling, secure therapy, ethical therapy, privacy-first" />
+    <meta name="author" content="SafePsy" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    
+    <!-- Viewport and Mobile Optimization -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/png" href="/HeadsOnlyTransparent.png" />
+    <link rel="apple-touch-icon" href="/HeadsOnlyTransparent.png" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#3B82F6" />
+    <meta name="msapplication-TileColor" content="#3B82F6" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://safepsy.com/" />
+    <meta property="og:title" content="SafePsy - Privacy-First Online Therapy Platform" />
+    <meta property="og:description" content="Revolutionizing online therapy with privacy-first technology. Secure, ethical, and human-centered mental health support." />
+    <meta property="og:image" content="https://safepsy.com/Logotransparent.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="SafePsy" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://safepsy.com/" />
+    <meta name="twitter:title" content="SafePsy - Privacy-First Online Therapy" />
+    <meta name="twitter:description" content="Revolutionizing online therapy with privacy-first technology. Secure, ethical, and human-centered mental health support." />
+    <meta name="twitter:image" content="https://safepsy.com/Logotransparent.png" />
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+  </head>
+  <body>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px; z-index: 999; padding: 1em; background: #3B82F6; color: white; text-decoration: none;">
+      Skip to main content
+    </a>
+    <script>
+      // Make skip link visible on focus
+      document.addEventListener('DOMContentLoaded', function() {
+        const skipLink = document.querySelector('.skip-link');
+        if (skipLink) {
+          skipLink.addEventListener('focus', function() {
+            this.style.left = '0';
+          });
+          skipLink.addEventListener('blur', function() {
+            this.style.left = '-9999px';
+          });
+        }
+      });
+    </script>
+    
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+---
+description: Docker usage standards
+globs: "{**/Dockerfile,**/docker-compose*.yml}"
+alwaysApply: false
+---
+
+# Docker Standards
+
+- Use multi-stage builds for runtime images when feasible.
+- Do not expose ports that are not required by app traffic or health checks.
+- Use restart policies (`unless-stopped` or `always`) for production services.
+- Pin explicit image tags; avoid `latest`.
+- Keep runtime images lean (remove build tools and caches).
+- Prefer environment variables and secrets over hardcoded credentials.
+- Reference project manifests when editing: `@docker-compose.dev.yml`, `@docker-compose.prod.yml`.

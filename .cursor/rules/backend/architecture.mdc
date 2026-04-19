@@ -1,0 +1,14 @@
+---
+description: Backend architecture standards
+globs: "{backend/**/*.ts,backend/**/*.js}"
+alwaysApply: false
+---
+
+# Backend Architecture
+
+- Keep controllers thin; orchestrate only request parsing and response mapping.
+- Place business rules in services/use-cases, not in controllers/routes.
+- Keep data access in repositories or dedicated persistence layers.
+- Use typed request/response contracts and validated DTOs/schemas.
+- Handle errors explicitly with consistent logging and status mapping.
+- Avoid cross-layer imports that bypass service boundaries.

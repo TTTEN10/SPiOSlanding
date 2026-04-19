@@ -1,0 +1,16 @@
+---
+description: Production recovery workflow
+globs: "{deployment/**/*.sh,documentation/**/*.md,deploy/**/*.yml,deploy/**/*.yaml}"
+alwaysApply: false
+---
+
+# Production Recovery
+
+- Check instance and network status before remediation actions.
+- If app is down, follow this order:
+  1. Check container/process status.
+  2. Check service and proxy logs.
+  3. Restart only affected services if required.
+- Never redeploy blindly when root cause is unknown.
+- Fix root cause before restart or redeploy.
+- Verify recovery with endpoint checks and container health checks.

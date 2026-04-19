@@ -1,0 +1,14 @@
+---
+description: Caddy server configuration rules
+globs: "{**/Caddyfile,**/*.caddy}"
+alwaysApply: false
+---
+
+# Caddy Configuration
+
+- Ensure HTTPS/TLS behavior remains explicit and intentional.
+- Preserve existing working routes unless replacement is validated.
+- Validate each reverse proxy target host/port before deploying.
+- Keep route matchers explicit and readable; avoid ambiguous catch-alls.
+- Add or update health-check friendly endpoints when changing routing.
+- Reference active config context when available: `@Caddyfile`.

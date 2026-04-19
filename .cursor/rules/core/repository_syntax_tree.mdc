@@ -1,0 +1,28 @@
+---
+description: After substantive edits, check whether REPOSITORY_SYNTAX_TREE.md needs updating
+alwaysApply: true
+---
+
+# Repository syntax tree doc
+
+The file `documentation/private documentation/REPOSITORY_SYNTAX_TREE.md` is the canonical tree map of the repo (apps, scripts, deploy paths, documentation layout).
+
+**Before treating a task as complete** (especially after multi-file or structural work), briefly decide whether that doc is still accurate.
+
+## Update the tree when changes affect what it describes
+
+- New, removed, or renamed **directories** or **important entry files** under `apps/`, `deployment/`, `deploy/`, `scripts/`, `infra/`, `.github/workflows/`, or top-level layout.
+- New or removed **routes**, **middleware**, or **major modules** under `apps/api/src/` or `apps/web/src/` (add/remove the corresponding line in the tree section).
+- **Documentation** layout changes under `documentation/public documentation/` or `documentation/private documentation/`.
+- **Tooling/config** called out in the tree (e.g. new workflow, new Cursor rules under `.cursor/rules/`, Semgrep outputs).
+
+## Skip when impact is local or trivial
+
+- Single-file bugfixes, typings, or refactors that do not add/remove files or change paths described in the tree.
+- Comment-only or copy-only edits.
+- Changes already limited to `REPOSITORY_SYNTAX_TREE.md` itself.
+
+## Outcome
+
+- If an update is needed, apply it in the same completion when practical and keep the tree consistent with the actual filesystem.
+- If no update is needed, no extra prose is required unless the user asked for a changelog-style summary.

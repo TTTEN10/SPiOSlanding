@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true
+  },
+  "include": ["hardhat.config.ts", "src/contracts/**/*"]
+}

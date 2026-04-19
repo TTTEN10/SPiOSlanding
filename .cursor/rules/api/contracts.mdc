@@ -1,0 +1,14 @@
+---
+description: API contract and chatbot service rules
+globs: "{api/**/*.ts,apps/api/**/*.ts,apps/ai-chatbot/**/*.ts}"
+alwaysApply: false
+---
+
+# API Contracts and Resilience
+
+- Validate all request payloads, params, and query shapes strictly.
+- Keep response schemas stable; preserve backward compatibility.
+- Version contract changes and document migration path.
+- Log errors with actionable context (endpoint, input class, correlation id).
+- Apply retries/timeouts/circuit-breaker patterns for external dependencies.
+- Protect uptime with health checks and graceful degradation behavior.

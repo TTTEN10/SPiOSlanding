@@ -1,0 +1,12 @@
+---
+description: API folder scoped coding guardrails
+globs: "**/*.{ts,js,json,yml,yaml,sh}"
+alwaysApply: false
+---
+
+# API Scoped Rule
+
+- Preserve API contract compatibility unless explicitly versioning changes.
+- Validate request/response schemas and error payload consistency.
+- Add clear structured logs for failures and retries.
+- Favor resilient behavior for downstream dependency failures.

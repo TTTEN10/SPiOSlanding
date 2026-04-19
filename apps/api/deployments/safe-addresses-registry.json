@@ -1,0 +1,92 @@
+[
+  {
+    "address": "0x8644F9AaB59C411AAE7E397aDEAc44a1dc34fCb1",
+    "name": "Gov Safe",
+    "chainId": 1
+  },
+  {
+    "address": "0x4D32FFBA2A7e090a10789fc094572f61E956f809",
+    "name": "Account 2",
+    "chainId": 1
+  },
+  {
+    "address": "0x76ADb37345E11ce4db3E003a1A9a7F3bAaAE6Bec",
+    "name": "Account 3",
+    "chainId": 1
+  },
+  {
+    "address": "0xf57C6BfF6f4cb260436785Cc0c4D66B3882c51cf",
+    "name": "Account 4",
+    "chainId": 1
+  },
+  {
+    "address": "0xB530bA7792f0F83f7A1206c92395086982a65ce2",
+    "name": "Account 5",
+    "chainId": 1
+  },
+  {
+    "address": "0x0F630ECB273c391554f88ad756f19a9e9c094983",
+    "name": "Emergency Safe",
+    "chainId": 1
+  },
+  {
+    "address": "0xCfaee5C37caAB73E1D4384fdBB74b20B351Ff8F3",
+    "name": "Account 6",
+    "chainId": 1
+  },
+  {
+    "address": "0x532B90eEEA3119F33aC7D2c492F55a7DA7FF5154",
+    "name": "Account 7",
+    "chainId": 1
+  },
+  {
+    "address": "0x2b2A68BCca7099745Ad4E864CfBdc5D4b618e625",
+    "name": "Account 8",
+    "chainId": 1
+  },
+  {
+    "address": "0x8644F9AaB59C411AAE7E397aDEAc44a1dc34fCb1",
+    "name": "Gov Safe",
+    "chainId": 11155111
+  },
+  {
+    "address": "0x4D32FFBA2A7e090a10789fc094572f61E956f809",
+    "name": "Account 2",
+    "chainId": 11155111
+  },
+  {
+    "address": "0x76ADb37345E11ce4db3E003a1A9a7F3bAaAE6Bec",
+    "name": "Account 3",
+    "chainId": 11155111
+  },
+  {
+    "address": "0xf57C6BfF6f4cb260436785Cc0c4D66B3882c51cf",
+    "name": "Account 4",
+    "chainId": 11155111
+  },
+  {
+    "address": "0xB530bA7792f0F83f7A1206c92395086982a65ce2",
+    "name": "Account 5",
+    "chainId": 11155111
+  },
+  {
+    "address": "0x0F630ECB273c391554f88ad756f19a9e9c094983",
+    "name": "Emergency Safe",
+    "chainId": 11155111
+  },
+  {
+    "address": "0xCfaee5C37caAB73E1D4384fdBB74b20B351Ff8F3",
+    "name": "Account 6",
+    "chainId": 11155111
+  },
+  {
+    "address": "0x532B90eEEA3119F33aC7D2c492F55a7DA7FF5154",
+    "name": "Account 7",
+    "chainId": 11155111
+  },
+  {
+    "address": "0x2b2A68BCca7099745Ad4E864CfBdc5D4b618e625",
+    "name": "Account 8",
+    "chainId": 11155111
+  }
+]

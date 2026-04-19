@@ -1,0 +1,14 @@
+---
+description: Service validation checklist
+globs: "{deployment/**/*.sh,deploy/**/*.yml,deploy/**/*.yaml,.github/workflows/**/*.yml,.github/workflows/**/*.yaml}"
+alwaysApply: false
+---
+
+# Service Validation Checklist
+
+- Frontend loads without blocking runtime errors.
+- Backend responds to expected API health/status calls.
+- API/chatbot service is reachable and returns valid responses.
+- Reverse proxy routes requests to correct upstream services.
+- No failing/unhealthy containers remain after rollout.
+- Validate key user flows, not only health endpoints.

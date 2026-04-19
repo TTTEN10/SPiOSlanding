@@ -1,0 +1,12 @@
+---
+description: Frontend folder scoped coding guardrails
+globs: "**/*.{tsx,ts,css,scss,json,yml,yaml}"
+alwaysApply: false
+---
+
+# Frontend Scoped Rule
+
+- Keep UI and state concerns separate from infrastructure scripts.
+- Route network calls through shared API clients.
+- Preserve accessibility basics when modifying components.
+- Avoid introducing business logic directly in view templates.

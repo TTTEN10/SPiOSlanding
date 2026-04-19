@@ -1,0 +1,49 @@
+# CI runners: enforce stricter free-disk rules than production observability.
+# Production: Prometheus LowDiskSpace fires when root filesystem free < 15%
+# (see infra/observability/prometheus/alerts.yml). This action reclaims
+# ephemeral tooling on ubuntu-latest and fails the job if free space is still
+# below min-free-percent (default 20%).
+name: 'CI disk guard'
+description: 'Reclaim runner disk and require more free space than production alert threshold'
+
+inputs:
+  min-free-percent:
+    description: 'Minimum free space required on / (percent). Must stay above production LowDiskSpace (15%).'
+    default: '20'
+  aggressive-cleanup:
+    description: 'Remove large preinstalled SDKs (Android, .NET, etc.) to maximize build headroom'
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Disk status (before cleanup)
+      shell: bash
+      run: df -h /
+
+    - name: Reclaim runner disk
+      if: inputs.aggressive-cleanup == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get clean 2>/dev/null || true
+        sudo docker system prune -af 2>/dev/null || true
+        sudo rm -rf /usr/local/lib/android /usr/share/dotnet /usr/local/share/powershell /usr/share/swift 2>/dev/null || true
+
+    - name: Enforce minimum free space (stricter than production)
+      shell: bash
+      env:
+        MIN_FREE: ${{ inputs.min-free-percent }}
+      run: |
+        set -euo pipefail
+        df -h /
+        pct_free=$(df -P / | awk 'NR==2 { if ($2+0 == 0) exit 1; printf "%d", 100 * $4 / $2 }')
+        if [ -z "${pct_free}" ]; then
+          echo "::error::Could not compute free disk percent for /"
+          exit 1
+        fi
+        echo "Root filesystem free: ${pct_free}% (required: ${MIN_FREE}%+, production alert: <15% free)"
+        if [ "$pct_free" -lt "$MIN_FREE" ]; then
+          echo "::error::Insufficient disk space on CI runner (${pct_free}% free, min ${MIN_FREE}%). Production only alerts below 15% free — CI is stricter by design."
+          exit 1
+        fi

@@ -1,0 +1,16 @@
+[Unit]
+Description=SPapp app-server self-healing monitor (no full deploy — recovery script only)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Production layout: scripts live under /opt/spapp-monitor (see deployment/install-app-monitor-remote.sh)
+WorkingDirectory=/opt/spapp-monitor
+Environment=MONITOR_ROOT=/opt/spapp-monitor
+EnvironmentFile=-/etc/default/app-monitor
+ExecStart=/opt/spapp-monitor/monitor.sh
+User=root
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,64 @@
+# Production Deployment Workflow
+# Deploys SafePsy app to the production instance (scw-happy-app, 51.159.149.66) via SSH + rsync.
+# Chatbot / LLM API runs on scw-new-psy (62.210.238.160); full stack uses deployment/deploy.sh on a trusted host.
+# Requires GitHub secrets: SSH_PRIVATE_KEY (key that is attached to the Scaleway instance), DATABASE_PASSWORD.
+# Trigger: Actions tab → Deploy Production → Run workflow.
+# Note: If SSH times out from your Mac, the runner may also timeout; see fix_ssh.md / deployment_issue.md.
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    env:
+      SSH_SERVER_IP: "51.159.149.66"
+      DEPLOY_VIA_RSYNC: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Set env
+        run: |
+          if [ -z "${{ secrets.DATABASE_PASSWORD }}" ]; then
+            echo "::error::DATABASE_PASSWORD secret is not set. Add it in repo Settings → Secrets."
+            exit 1
+          fi
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H 51.159.149.66 >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "SSH_KEY_FILE=$HOME/.ssh/id_ed25519" >> $GITHUB_ENV
+
+      - name: Deploy
+        run: |
+          chmod +x deployment/deploy-safepsy.sh
+          bash deployment/deploy-safepsy.sh
+
+      - name: Verify deployment
+        continue-on-error: true
+        run: |
+          sleep 30
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -sf --connect-timeout 10 http://51.159.149.66/api/healthz; then
+              echo "✅ App reachable at http://51.159.149.66/api/healthz"
+              exit 0
+            fi
+            if curl -sf --connect-timeout 10 https://safepsy.com/api/healthz; then
+              echo "✅ App reachable at https://safepsy.com/api/healthz"
+              exit 0
+            fi
+            echo "Attempt $i - retrying in 15s..."
+            sleep 15
+          done
+          echo "::warning::Health check did not pass (app may still be starting or build is slow)"

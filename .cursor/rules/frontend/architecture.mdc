@@ -1,0 +1,14 @@
+---
+description: Frontend architecture standards
+globs: "{frontend/**/*.tsx,frontend/**/*.ts,apps/web/**/*.tsx,apps/web/**/*.ts}"
+alwaysApply: false
+---
+
+# Frontend Architecture
+
+- Build reusable, composable UI components with clear props contracts.
+- Keep business logic out of presentation components.
+- Use hooks/services/selectors for stateful or derived logic.
+- Keep state predictable; avoid ad hoc global mutable state.
+- Centralize API calls in dedicated clients/services.
+- Handle loading, error, and empty states consistently.

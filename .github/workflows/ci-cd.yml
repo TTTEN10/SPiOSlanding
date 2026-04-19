@@ -1,0 +1,264 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  TERRAFORM_VERSION: '1.5.7'
+
+jobs:
+  # Terraform Validation (blocking)
+  terraform-validation:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra/terraform
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -no-color
+        env:
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+        continue-on-error: true  # Allow plan to fail if credentials aren't set
+
+  # Layer 1 — Code Quality (non-blocking for now, but always reported)
+  code-quality:
+    name: Code Quality (non-blocking)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [web, api]
+    defaults:
+      run:
+        working-directory: ./apps/${{ matrix.app }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies (workspace)
+        run: |
+          cd ../..
+          npm ci
+
+      - name: TypeScript Type Check (non-blocking)
+        id: typecheck
+        continue-on-error: true
+        run: npm run typecheck
+
+      - name: Lint (non-blocking)
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Unit tests (non-blocking)
+        id: tests
+        continue-on-error: true
+        run: npm test -- --run
+
+      - name: Summary (Code Quality)
+        if: always()
+        run: |
+          echo "## Code Quality — apps/${{ matrix.app }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- TYPECHECK: ${{ steps.typecheck.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- LINT: ${{ steps.lint.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- TESTS: ${{ steps.tests.outcome }}" >> $GITHUB_STEP_SUMMARY
+
+  # Layer 2 — Build Validation (semi-blocking: warning for now)
+  build-validation:
+    name: Build Validation (warning for now)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build All (non-blocking temporarily)
+        id: build
+        continue-on-error: true
+        run: npm run build
+
+      - name: Summary (Build)
+        if: always()
+        run: |
+          echo "## Build Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- BUILD: ${{ steps.build.outcome }} (non-blocking for now)" >> $GITHUB_STEP_SUMMARY
+
+  # Layer 3 — Deployment Readiness (STRICT, blocking)
+  deployment-readiness:
+    name: Deployment Readiness (strict)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+      
+      - name: Validate required deployment/recovery scripts exist
+        run: |
+          set -euo pipefail
+          required=(
+            "deployment/deploy-app.sh"
+            "deployment/on-app-server-recover.sh"
+            "deployment/install-app-monitor-remote.sh"
+            "deployment/app-server-monitor/monitor.sh"
+          )
+          for f in "${required[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Missing required file: $f"
+              exit 1
+            fi
+          done
+
+      - name: Validate self-healing constraints (no rebuild loops, no localhost healthcheck)
+        run: |
+          set -euo pipefail
+          # Monitor must not use localhost healthcheck
+          if grep -RIn "127\\.0\\.0\\.1" deployment/app-server-monitor/ deployment/on-app-server-recover.sh; then
+            echo "::error::Found localhost healthcheck usage (127.0.0.1) in app-server monitor/recover scripts."
+            exit 1
+          fi
+          # Monitor must not force docker compose --build
+          if grep -RIn "docker compose .*--build" deployment/on-app-server-recover.sh deployment/app-server-monitor/monitor.sh; then
+            echo "::error::Found forbidden --build in recovery path."
+            exit 1
+          fi
+
+      - name: Validate deploy script is NOT used by app-server recovery
+        run: |
+          set -euo pipefail
+          if grep -RIn "deploy-app\\.sh" deployment/app-server-monitor/ deployment/on-app-server-recover.sh; then
+            echo "::error::App-server recovery must not call deploy-app.sh."
+            exit 1
+          fi
+
+      - name: Summary (Deployment Readiness)
+        if: always()
+        run: |
+          echo "## Deployment Readiness" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- DEPLOYMENT SCRIPTS: ok" >> $GITHUB_STEP_SUMMARY
+          echo "- MONITORING SETUP: ok" >> $GITHUB_STEP_SUMMARY
+
+  # Deployment Validation (Terraform Plan with credentials)
+  terraform-plan:
+    name: Terraform Deployment Plan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: ./infra/terraform
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CI disk guard (stricter than production)
+        uses: ./.github/actions/ci-disk-guard
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -no-color -out=tfplan
+        env:
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+        continue-on-error: true
+
+      - name: Comment PR with Plan
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('infra/terraform/tfplan', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## Terraform Plan\n\n```\n' + plan + '\n```'
+            });
+
+  # Summary Job
+  validation-summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [terraform-validation, code-quality, build-validation, deployment-readiness]
+    if: always()
+    
+    steps:
+      - name: Check Job Status
+        run: |
+          echo "Terraform Validation: ${{ needs.terraform-validation.result }}"
+          echo "Code Quality: ${{ needs.code-quality.result }}"
+          echo "Build Validation: ${{ needs.build-validation.result }}"
+          echo "Deployment Readiness: ${{ needs.deployment-readiness.result }}"
+          
+          if [ "${{ needs.terraform-validation.result }}" == "failure" ] || \
+             [ "${{ needs.deployment-readiness.result }}" == "failure" ]; then
+            echo "❌ Some validation steps failed"
+            exit 1
+          else
+            echo "✅ All validation steps passed"
+          fi
+

@@ -1,0 +1,73 @@
+{
+  "name": "safepsy-landing",
+  "version": "1.0.0",
+  "description": "SafePsy landing page - Secure, Ethical, Human-centered online therapy platform",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "cd apps/web && vite",
+    "dev:api": "cd apps/api && nodemon --config nodemon.json",
+    "dev": "concurrently -k \"npm:dev:web\" \"npm:dev:api\"",
+    "dev:mobile": "npm run start -w safepsy-mobile",
+    "mobile:eas:build:ios": "npm run eas:build:ios -w safepsy-mobile",
+    "mobile:eas:submit:ios": "npm run eas:submit:ios -w safepsy-mobile",
+    "build:web": "tsc -b apps/web && vite build --config apps/web/vite.config.ts",
+    "build:api": "tsc -b apps/api",
+    "build": "npm run build:web && npm run build:api",
+    "test": "npm run test:web && npm run test:api",
+    "test:web": "cd apps/web && vitest run",
+    "test:api": "cd apps/api && vitest run",
+    "test:contract": "cd apps/api && npx hardhat test",
+    "lint": "npm run lint:web && npm run lint:api",
+    "lint:web": "cd apps/web && npm run lint",
+    "lint:api": "cd apps/api && npm run lint",
+    "format": "npm run format:web && npm run format:api",
+    "format:check": "npm run format:check:web && npm run format:check:api",
+    "format:web": "cd apps/web && npm run format",
+    "format:api": "cd apps/api && npm run format",
+    "format:check:web": "cd apps/web && npm run format:check",
+    "format:check:api": "cd apps/api && npm run format:check",
+    "typecheck": "npm run typecheck:web && npm run typecheck:api && npm run typecheck:api-contracts",
+    "typecheck:web": "cd apps/web && npm run typecheck",
+    "typecheck:api": "cd apps/api && npm run typecheck",
+    "typecheck:api-contracts": "cd apps/api && npm run typecheck:contracts",
+    "db:generate": "prisma generate --schema=apps/api/schema.prisma",
+    "db:push": "prisma db push --schema=apps/api/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema=apps/api/schema.prisma",
+    "db:studio": "prisma studio --schema=apps/api/schema.prisma",
+    "security:check": "node scripts/security-check.js",
+    "security:audit": "npm audit --workspaces --audit-level=moderate",
+    "security:fix": "npm audit fix --workspaces",
+    "security:update": "npm update --workspaces",
+    "verify:flow": "cd apps/api && npx tsx ../../scripts/verify-mock-flow.ts"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "prisma": "^6.19.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.2"
+  },
+  "overrides": {
+    "qs": "^6.14.1",
+    "parse-duration": "^2.1.3",
+    "axios": "^1.12.0",
+    "react-router-dom": "^7.12.0",
+    "@remix-run/router": "^7.12.0"
+  },
+  "resolutions": {
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@openzeppelin/hardhat-upgrades": "^3.0.0"
+  }
+}

@@ -1,0 +1,15 @@
+---
+description: Terraform infrastructure rules
+globs: "**/*.tf"
+alwaysApply: false
+---
+
+# Terraform Rules
+
+- Never destroy existing infrastructure without explicit confirmation.
+- Run `terraform plan` and review drift before any `apply`.
+- Keep configurations idempotent and safe for repeated runs.
+- Avoid hardcoded environment values; use variables and tfvars.
+- Export critical resources through outputs for downstream tooling.
+- Use clear resource naming aligned with environment and service role.
+- Prefer incremental changes over broad refactors in live environments.

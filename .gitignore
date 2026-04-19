@@ -1,0 +1,222 @@
+# Python
+**/.venv-py311/
+.venv-py311/
+**/.venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production builds
+dist/
+build/
+
+# Environment variables and configuration files with credentials
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+*.env
+!*.env.example
+!env.example
+!**/env.example
+!**/*.env.example
+
+# Security scan output (large artifacts; Semgrep JSON/text exports if stored in-repo)
+.semgrep-out/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs (root logs/ holds self-healing monitor logs; *.log ignores contents)
+*.log
+!/logs/.gitkeep
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# (duplicate removed - already covered above)
+
+# Hardhat files
+cache/
+artifacts/
+typechain-types/
+
+# Docker
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+
+# Build artifacts
+*.tsbuildinfo
+*.js.map
+*.d.ts.map
+
+# Database files
+*.db
+*.db-journal
+
+# User-specific files
+.cursor-tutor/
+.nvm/
+
+# Vite / frontend tooling caches
+**/.vite/
+
+# Cursor local debug artifacts (never commit)
+.cursor/debug-*.log
+
+# Local-only debug logging helpers (Cursor / NDJSON ingest experiments)
+apps/api/src/lib/debug-log.ts
+backend/src/debug-log.ts
+
+# Additional security - private keys and secrets
+*.pem
+*.key
+*.p12
+*.pfx
+*private*
+# Allow only the canonical repo tree map (folder name matches *private*).
+!documentation/private documentation/
+!documentation/private documentation/REPOSITORY_SYNTAX_TREE.md
+documentation/private documentation/*
+!documentation/private documentation/REPOSITORY_SYNTAX_TREE.md
+!documentation/private documentation/EXCHANGE_PARTNER_ONE_PAGER.md
+!documentation/private documentation/LAUNCH.md
+!documentation/private documentation/NEW_INSTANCES_DEPLOYMENT.md
+!documentation/private documentation/PERSONAS.md
+!documentation/private documentation/VC_ONE_PAGER.md
+!documentation/private documentation/TECHNICAL_REVIEW.md
+!documentation/private documentation/programming_sprint.md
+*secret*
+*credentials*
+*secrets*
+
+# Backup configuration files (may contain credentials)
+backup-config.env
+**/backup-config.env
+!**/backup-config.env.example
+
+# Configuration files that may contain credentials
+config.json
+config.local.json
+**/config.local.*
+secrets.json
+credentials.json
+.secrets
+.credentials
+
+# Terraform files with credentials
+terraform.tfvars
+*.tfvars
+!terraform.tfvars.example
+!**/*.tfvars.example
+*.tfstate
+*.tfstate.backup
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Yarn cache
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Local deployment run artifacts (not source of truth)
+deployment/deployment-logs/
+
+# Deployment files that may contain server IPs or credentials
+# Note: Deployment scripts with hardcoded IPs should be reviewed
+# but are kept for operational purposes - consider using environment variables
+
+# Hardhat/Blockchain files
+# Note: Deployment JSON files typically only contain public addresses (safe to commit)
+# But local deployment files might contain sensitive info - review before committing
+apps/api/.openzeppelin/
+apps/api/cache/
+apps/api/artifacts/
+# Only ignore deployment files if they contain private keys (review manually)
+# apps/api/deployments/local-*.json
+
+# Google service account credentials
+*-service-account*.json
+google-credentials.json
+service-account*.json
+
+# AWS credentials
+.aws/
+aws-credentials
+aws-config
+
+# Self-healing monitor runtime state (local clone; server uses /opt/spapp-monitor/state|lock)
+.lock/deploy.lock
+.lock/monitor_state
+
+# Scaleway credentials
+.scaleway/
+scaleway-credentials
+
+# Secret Manager setup files with credentials
+SINGLE_SECRET_SETUP.md
+
+# SSH keys (private keys only - public keys are generally safe to commit)
+id_rsa
+id_ed25519
+id_ecdsa
+id_dsa
+id_rsa_*
+id_ed25519_*
+id_ecdsa_*
+id_dsa_*
+ssh_key
+ssh-key
+# Note: *.pem and *.key are already covered above

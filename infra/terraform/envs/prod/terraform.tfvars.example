@@ -1,0 +1,10 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Do not commit terraform.tfvars.
+# Scaleway console organization ID is optional for this stack (not passed to provider).
+
+scaleway_access_key  = "SCWXXXXXXXXXXXXXXXXX"
+scaleway_secret_key    = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+scaleway_project_id    = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Optional overrides (defaults in variables.tf: app scw-happy-app, chatbot scw-new-psy)
+# chatbot_instance_id = "60a5e86a-07a8-4e17-aa3b-862ae586d030"
+# app_instance_id     = "51c98b35-29cf-4650-9acd-927bf0bbb2cf"
