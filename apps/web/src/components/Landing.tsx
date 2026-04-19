@@ -31,10 +31,12 @@ export default function Landing() {
               </p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl text-heading leading-tight font-normal fade-in">
                 <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-bold">
-                  Feel better without giving up your story: Dr. Safe for ethical AI support, secured by wallet-based
-                  identity and encrypted continuity by design.
+                  Feel better without giving up your story
                 </span>
               </h1>
+              <p className="text-lg sm:text-xl text-body leading-relaxed mt-6 max-w-3xl">
+                Dr. Safe for ethical AI support, secured by wallet-based identity and encrypted continuity by design.
+              </p>
               <p className="text-lg sm:text-xl text-body leading-relaxed mt-6 max-w-3xl">
                 No data sharing. No model training.
                 <br />
