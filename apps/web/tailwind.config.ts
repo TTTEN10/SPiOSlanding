@@ -1,9 +1,16 @@
 import type { Config } from 'tailwindcss'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+// Resolve globs from this package directory. `npm run build:web` runs Vite from the monorepo
+// root (`vite build --config apps/web/vite.config.ts`); relative `./src/**` would scan the
+// wrong tree and produce CSS with preflight only — no utility classes.
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const config: Config = {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    path.join(__dirname, 'index.html'),
+    path.join(__dirname, 'src/**/*.{js,ts,jsx,tsx}'),
   ],
   darkMode: 'class',
   theme: {
