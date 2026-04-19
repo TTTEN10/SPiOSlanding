@@ -228,6 +228,8 @@ app.use('/api', rateLimitMiddleware);
 app.use(metricsMiddleware);
 
 app.get("/healthz", (_req, res) => res.send("ok"));
+// Alias for reverse proxies that keep the `/api` prefix (e.g. Caddy `handle /api/*` without strip).
+app.get("/api/healthz", (_req, res) => res.send("ok"));
 app.get("/readyz", (_req, res) => res.send("ready"));
 
 // Prometheus metrics endpoint

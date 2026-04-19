@@ -17,7 +17,7 @@ const Feedback: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header showBackButton={true} />
+      <Header />
       <main id="main-content" className="flex-1 section-padding py-8 lg:py-12" role="main" aria-label="Beta feedback" tabIndex={-1}>
         <div className="container-max max-w-3xl">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl text-heading mb-4">

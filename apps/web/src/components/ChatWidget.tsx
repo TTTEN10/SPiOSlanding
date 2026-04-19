@@ -11,6 +11,7 @@ import { getActionableErrorMessage } from '../utils/errorMessages';
 import Paywall from './Paywall';
 import EmptyState from './EmptyState';
 import GuestModeLimitModal from './GuestModeLimitModal';
+import ConnectWallet from './ConnectWallet';
 
 interface Message {
   id: string;
@@ -681,13 +682,18 @@ export default function ChatWidget() {
       {/* Header */}
       <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-white/20 rounded-t-lg space-y-2">
         {isGuest ? (
-          <p
-            className="text-xs font-medium text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2 text-center"
-            role="status"
-          >
-            Guest mode: this chat lives in this tab only — refresh clears it. When you&apos;re ready, save it securely
-            with a wallet (ownership + privacy tool — not a payment).
-          </p>
+          <>
+            <p
+              className="text-xs font-medium text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2 text-center"
+              role="status"
+            >
+              Guest mode: this chat lives in this tab only — refresh clears it. When you&apos;re ready, save it securely
+              with a wallet (ownership + privacy tool — not a payment).
+            </p>
+            <div id="wallet-connect-region" className="flex flex-wrap items-center justify-center gap-2 pt-1">
+              <ConnectWallet />
+            </div>
+          </>
         ) : (
           <p className="text-xs text-body opacity-60 text-center">
             All the exchanged data will be encrypted and stored in your personal wallet. Nobody except you

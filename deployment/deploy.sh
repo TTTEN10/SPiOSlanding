@@ -45,6 +45,8 @@ if [[ "${SINGLE_INSTANCE_ONLY:-1}" == "1" ]]; then
   export APP_IP="${APP_HOST}"
   export SINGLE_HOST=1
   export SKIP_VLLM_DEPLOY=1
+  export ALLOW_DEGRADED_CHATBOT="${ALLOW_DEGRADED_CHATBOT:-1}"
+  export POST_DEPLOY_LANDING_ONLY="${POST_DEPLOY_LANDING_ONLY:-1}"
   exec "${SCRIPT_DIR}/deploy-app.sh" "$@"
 fi
 
@@ -359,6 +361,11 @@ post_deploy_verify() {
   log "POST-DEPLOY VERIFY (public HTTPS)"
   curl -fsS --max-time 25 "https://${APP_DOMAIN}/api/healthz" >/dev/null \
     || die "post-deploy: https://${APP_DOMAIN}/api/healthz failed"
+  if [[ "${POST_DEPLOY_LANDING_ONLY:-0}" == "1" ]]; then
+    log_event "post_deploy_verify_ok" "{\"APP_DOMAIN\":\"${APP_DOMAIN}\",\"mode\":\"landing\"}"
+    log "POST-DEPLOY VERIFY OK (landing: healthz only)"
+    return 0
+  fi
   curl -fsS --max-time 25 "https://${APP_DOMAIN}/api/v1/models" >/dev/null \
     || die "post-deploy: https://${APP_DOMAIN}/api/v1/models failed"
   log_event "post_deploy_verify_ok" "{\"APP_DOMAIN\":\"${APP_DOMAIN}\"}"

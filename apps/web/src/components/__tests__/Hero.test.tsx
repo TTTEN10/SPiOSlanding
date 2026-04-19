@@ -6,11 +6,11 @@ import Hero from '../Hero'
 
 // Mock Header and Footer components
 vi.mock('../Header', () => ({
-  default: ({ showTagline }: { showTagline?: boolean }) => (
+  default: () => (
     <header data-testid="header">
-      Header {showTagline && '(with tagline)'}
+      Header
     </header>
-  )
+  ),
 }))
 
 vi.mock('../Footer', () => ({

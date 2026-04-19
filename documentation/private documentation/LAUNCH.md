@@ -166,6 +166,8 @@ Covers: encryption (E2E?, who can read?, key loss), compliance (HIPAA, GDPR, ISO
 
 **Full deploy:** `./deployment/deploy.sh` from repo root. **App-only:** `DEPLOY_LEGACY=1 ./deployment/deploy.sh`.
 
+**Landing-only (default `deploy.sh`):** single VM with Docker Compose (`deployment/landing/docker-compose.yml`) — Postgres, Express API (`apps/api`, Prisma waitlist/contact), built `apps/web`, Caddy. **Local parity:** `./deployment/run-local-landing.sh` then open `http://localhost:8080`. On the server, merge secrets into `/home/safepsy/app/.env` (e.g. `POSTMARK_API_TOKEN`, `EMAIL_PROVIDER=postmark`, `ENABLE_CONFIRMATION_EMAIL=true`); the deploy script preserves existing keys when updating `DATABASE_URL` / `POSTGRES_PASSWORD`.
+
 ### vLLM model (Dolphin Mistral 24B)
 
 The production deployment scripts support a vLLM OpenAI-compatible inference container. For **dphn/Dolphin-Mistral-24B-Venice-Edition**, vLLM must run with **Mistral tokenizer mode** (`tokenizer_mode=mistral`).

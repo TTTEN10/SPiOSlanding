@@ -80,11 +80,11 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ onConsentChange }) => {
 
   return (
     <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 fade-in" />
+      {/* Backdrop: visual only so header/links (e.g. Try beta) stay clickable; panel below handles consent. */}
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 fade-in pointer-events-none" aria-hidden="true" />
       
       {/* Cookie Banner */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4 fade-in">
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4 fade-in pointer-events-auto">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white/95 backdrop-blur-sm border border-neutral-200 dark:bg-black/95 dark:border-white/20 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 card-hover">
             {!showDetails ? (

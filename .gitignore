@@ -17,6 +17,11 @@ yarn-error.log*
 dist/
 build/
 
+# Do not commit emitted Vite config next to source — Vite prefers vite.config.js over
+# vite.config.ts, which silently drops PostCSS/Tailwind from the active dev config.
+apps/web/vite.config.js
+apps/web/vite.config.d.ts
+
 # Environment variables and configuration files with credentials
 .env
 .env.local

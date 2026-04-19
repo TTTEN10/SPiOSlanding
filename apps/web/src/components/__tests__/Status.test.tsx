@@ -6,11 +6,11 @@ import Status from '../Status'
 
 // Mock Header and Footer components
 vi.mock('../Header', () => ({
-  default: ({ showBackButton }: { showBackButton?: boolean }) => (
+  default: () => (
     <header data-testid="header">
-      Header {showBackButton && '(with back button)'}
+      Header
     </header>
-  )
+  ),
 }))
 
 vi.mock('../Footer', () => ({

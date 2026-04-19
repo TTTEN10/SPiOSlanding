@@ -35,6 +35,21 @@ export const seoConfig: Record<string, SEOConfig> = {
     twitterCard: 'summary_large_image',
     canonical: baseUrl,
   },
+  '/almost-there': {
+    title: 'Join the beta waitlist - SafePsy',
+    description:
+      'Beta will be available soon. Join the SafePsy waitlist to stay updated about our beta launch and product news.',
+    keywords: 'SafePsy beta, waitlist, Dr. Safe, mental health beta, early access',
+    ogTitle: 'Join the beta waitlist - SafePsy',
+    ogDescription: 'Join the SafePsy waitlist to stay updated about our beta launch.',
+    ogImage: defaultImage,
+    ogUrl: `${baseUrl}/almost-there`,
+    twitterTitle: 'Join the beta waitlist - SafePsy',
+    twitterDescription: 'Stay updated about the SafePsy beta launch.',
+    twitterImage: defaultImage,
+    twitterCard: 'summary',
+    canonical: `${baseUrl}/almost-there`,
+  },
   '/feedback': {
     title: 'Beta Feedback - SafePsy',
     description: 'Share your feedback on SafePsy beta experience and help improve Dr. Safe.',

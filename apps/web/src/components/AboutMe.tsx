@@ -418,7 +418,7 @@ export default function AboutMe() {
   if (!authState.isVerified) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header showBackButton={true} />
+        <Header />
         <main id="main-content" className="flex-1" role="main" aria-label="About Me" tabIndex={-1}>
           <section className="section-padding py-8 lg:py-12">
             <div className="container-max">
@@ -441,7 +441,7 @@ export default function AboutMe() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header showBackButton={true} />
+      <Header />
 
       {/* Main Content */}
       <main id="main-content" className="flex-1" role="main" aria-label="About Me" tabIndex={-1}>

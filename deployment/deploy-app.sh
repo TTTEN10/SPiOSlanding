@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Instance-aware end-to-end deployment script for:
-# - API server (vLLM/OpenAI-compatible endpoint)
-# - App server (frontend + backend + caddy)
+# - Optional API server (vLLM/OpenAI-compatible endpoint)
+# - App server: landing stack = Postgres + Express (`apps/api`) + static web (`apps/web`) + Caddy
 #
 # Strict order:
 # 1) Deploy API server first
@@ -74,7 +74,7 @@ API_BASE_DIR="/home/${APP_USER}/llm-api"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 WEB_SRC_DIR="${WEB_SRC_DIR:-${REPO_ROOT}/apps/web}"
-SCRIPT_VERSION="2026-04-07.1"
+SCRIPT_VERSION="2026-04-19.1"
 
 # Where vLLM / chatbot runs and how the app backend reaches it (set MODEL_API_URL_FOR_COMPOSE before this script to override).
 if [[ "${SINGLE_HOST}" == "1" ]]; then
@@ -246,9 +246,12 @@ else
   '"
 fi
 
-log "STEP 4: Verify inference endpoint is reachable"
+log "STEP 4: Verify inference endpoint is reachable (optional)"
+# Landing-only stacks skip vLLM/chatbot. Set REQUIRE_CHATBOT_GATE=1 to require :8000 when SKIP_VLLM_DEPLOY=1.
 if [[ "${ALLOW_DEGRADED_CHATBOT}" == "1" ]]; then
   log "ALLOW_DEGRADED_CHATBOT=1: skipping inference health gate"
+elif [[ "${SKIP_VLLM_DEPLOY}" == "1" && "${REQUIRE_CHATBOT_GATE:-0}" != "1" ]]; then
+  log "SKIP_VLLM_DEPLOY=1 and REQUIRE_CHATBOT_GATE unset: skipping chatbot/vLLM health gate (landing stack)"
 else
   if [[ "${SKIP_VLLM_DEPLOY}" == "1" ]]; then
     if [[ "${SINGLE_HOST}" == "1" ]]; then
@@ -279,238 +282,97 @@ if [[ "${REUSE_CONTAINERS}" == "1" ]]; then
     curl -fsS http://localhost >/dev/null
   '"
 else
-  log "STEP 5: Deploy app stack on APP server (apps/web frontend + backend + caddy)"
+  log "STEP 5: Deploy landing stack (apps/web + apps/api + Postgres + Caddy)"
   [[ -d "${WEB_SRC_DIR}" ]] || die "Frontend source directory not found: ${WEB_SRC_DIR}"
+  API_SRC_DIR="${API_SRC_DIR:-${REPO_ROOT}/apps/api}"
+  [[ -d "${API_SRC_DIR}" ]] || die "API source directory not found: ${API_SRC_DIR}"
+  LANDING_STACK_DIR="${SCRIPT_DIR}/landing"
+  [[ -f "${LANDING_STACK_DIR}/docker-compose.yml" ]] || die "Missing ${LANDING_STACK_DIR}/docker-compose.yml"
 
-  log "STEP 5a: Sync local apps/web -> ${APP_IP}:${APP_BASE_DIR}/frontend"
-  run_ssh "${APP_IP}" "bash -lc 'mkdir -p ${APP_BASE_DIR}/frontend && rm -rf ${APP_BASE_DIR}/frontend/*'"
+  log "STEP 5a: Sync apps/web, apps/api, landing compose → ${APP_IP}:${APP_BASE_DIR}"
+  run_ssh "${APP_IP}" "bash -lc 'mkdir -p ${APP_BASE_DIR}/frontend ${APP_BASE_DIR}/api && rm -rf ${APP_BASE_DIR}/frontend/* ${APP_BASE_DIR}/api/*'"
   COPYFILE_DISABLE=1 tar -C "${WEB_SRC_DIR}" -cf - . | run_ssh "${APP_IP}" "bash -lc 'tar -C ${APP_BASE_DIR}/frontend -xf -'"
+  COPYFILE_DISABLE=1 tar -C "${API_SRC_DIR}" \
+    --exclude=node_modules \
+    --exclude=dist \
+    --exclude=.git \
+    -cf - . | run_ssh "${APP_IP}" "bash -lc 'tar -C ${APP_BASE_DIR}/api -xf -'"
+  COPYFILE_DISABLE=1 tar -C "${LANDING_STACK_DIR}" -cf - docker-compose.yml frontend.Dockerfile \
+    | run_ssh "${APP_IP}" "bash -lc 'tar -C ${APP_BASE_DIR} -xf -'"
+  run_ssh "${APP_IP}" "bash -lc 'cp ${APP_BASE_DIR}/frontend.Dockerfile ${APP_BASE_DIR}/frontend/Dockerfile'"
 
-  run_ssh "${APP_IP}" "bash -lc '
-  set -euo pipefail
-  mkdir -p ${APP_BASE_DIR}/frontend ${APP_BASE_DIR}/backend
-  cd ${APP_BASE_DIR}
-
-  cat > frontend/Dockerfile <<\"EOF\"
-FROM node:20-alpine
-WORKDIR /app
-COPY . .
-# apps/web currently has strict TS errors in some files; build production bundle via Vite.
-ENV VITE_API_URL=https://${APP_DOMAIN}
-RUN npm install --legacy-peer-deps && npx vite build
-RUN npm install -g serve
-CMD [\"serve\", \"-s\", \"dist\", \"-l\", \"3000\"]
-EOF
-
-  cat > backend/requirements.txt <<\"EOF\"
-fastapi
-uvicorn
-httpx
-EOF
-
-  cat > backend/main.py <<\"EOF\"
-import json
-import os
-import time
-import httpx
-from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from starlette.responses import StreamingResponse
-
-app = FastAPI()
-MODEL_API_URL = os.getenv(\"MODEL_API_URL\", \"http://127.0.0.1:8000\").rstrip(\"/\")
-MODEL_API_URL_ALT = os.getenv(\"MODEL_API_URL_ALT\", \"\").strip().rstrip(\"/\")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[\"*\"],
-    allow_credentials=True,
-    allow_methods=[\"*\"],
-    allow_headers=[\"*\"],
-)
-
-@app.get(\"/health\")
-@app.get(\"/healthz\")
-def healthz():
-  return {\"ok\": True, \"service\": \"backend\"}
-
-def _upstream_bases():
-  out = []
-  for b in (MODEL_API_URL, MODEL_API_URL_ALT):
-    if b and b not in out:
-      out.append(b)
-  return out if out else [\"http://127.0.0.1:8000\"]
-
-def _models_upstream():
-  \"\"\"Proxy GET /v1/models; try each upstream base; never return HTTP 500 (verify + UIs).\"\"\"
-  errors = []
-  timeout = httpx.Timeout(45.0, connect=15.0)
-  for base in _upstream_bases():
-    try:
-      with httpx.Client(timeout=timeout) as client:
-        r = client.get(f\"{base}/v1/models\")
-        if r.status_code == 200:
-          data = r.json()
-          if isinstance(data, dict) and \"data\" in data:
-            return data
-        errors.append(f\"{base}: HTTP {r.status_code}\")
-    except Exception as e:
-      errors.append(f\"{base}: {type(e).__name__}\")
-  return JSONResponse(
-    status_code=200,
-    content={
-      \"object\": \"list\",
-      \"data\": [
-        {
-          \"id\": os.getenv(\"FALLBACK_MODEL_ID\", \"dr-safe\"),
-          \"object\": \"model\",
-          \"created\": int(time.time()),
-          \"owned_by\": \"safepsy\",
-        }
-      ],
-      \"warning\": \"chatbot /v1/models unreachable from app proxy: \" + \"; \".join(errors[:5]),
-    },
-  )
-
-@app.get(\"/models\")
-def models():
-  return _models_upstream()
-
-@app.get(\"/v1/models\")
-def v1_models():
-  return _models_upstream()
-
-def _want_stream(body: bytes) -> bool:
-  try:
-    return json.loads(body).get(\"stream\", True) is True
-  except Exception:
-    return True
-
-# Caddy handle_path /api/* strips /api prefix:
-#   /api/chat/completions → /chat/completions
-#   /api/v1/chat/completions → /v1/chat/completions
-@app.post(\"/chat/completions\")
-@app.post(\"/v1/chat/completions\")
-async def v1_chat_completions(request: Request):
-  body = await request.body()
-  ctype = request.headers.get(\"content-type\", \"application/json\")
-  headers = {\"Content-Type\": ctype}
-  timeout = httpx.Timeout(300.0, connect=30.0)
-  want_stream = _want_stream(body)
-  last_err = None
-  for base in _upstream_bases():
-    url = f\"{base}/v1/chat/completions\"
-    try:
-      if want_stream:
-        async def gen(u=url):
-          async with httpx.AsyncClient(timeout=timeout) as client:
-            async with client.stream(\"POST\", u, content=body, headers=headers) as response:
-              async for chunk in response.aiter_bytes():
-                yield chunk
-
-        return StreamingResponse(
-          gen(),
-          media_type=\"text/event-stream\",
-          status_code=200,
-        )
-
-      async with httpx.AsyncClient(timeout=timeout) as client:
-        r = await client.post(url, content=body, headers=headers)
-      return Response(
-        content=r.content,
-        status_code=r.status_code,
-        media_type=r.headers.get(\"content-type\", \"application/json\"),
-      )
-    except Exception as e:
-      last_err = e
-      continue
-  raise HTTPException(status_code=502, detail=f\"chatbot unreachable: {last_err!s}\")
-EOF
-
-  cat > backend/Dockerfile <<\"EOF\"
-FROM python:3.11-slim
-WORKDIR /app
-COPY . .
-RUN pip install --no-cache-dir -r requirements.txt
-CMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"5000\"]
-EOF
-
-  cat > docker-compose.yml <<\"EOF\"
-services:
-  frontend:
-    build: ./frontend
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-
-  backend:
-    build: ./backend
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    restart: unless-stopped
-    environment:
-      - MODEL_API_URL=${MODEL_API_URL_FOR_COMPOSE}
-      - MODEL_API_URL_ALT=${MODEL_API_URL_ALT_FOR_COMPOSE:-}
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-
-  caddy:
-    image: caddy:latest
-    restart: unless-stopped
-    ports:
-      - \"80:80\"
-      - \"443:443\"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-
-volumes:
-  caddy_data:
-  caddy_config:
-EOF
-
-  cat > Caddyfile <<\"EOF\"
+  _caddy_tmp="$(mktemp)"
+  cat > "${_caddy_tmp}" <<EOF
 ${CADDY_SITE_NAMES} {
   encode gzip
-  handle_path /api/* {
-    reverse_proxy backend:5000
+  handle /api/* {
+    reverse_proxy api:3001
   }
   reverse_proxy /* frontend:3000
 }
 
-# Plain HTTP for direct-IP access only (no public cert for raw IPs — avoids breaking :443 for real domains)
+# Plain HTTP for direct-IP access (no public cert for raw IPs)
 http://${APP_IP} {
   encode gzip
-  handle_path /api/* {
-    reverse_proxy backend:5000
+  handle /api/* {
+    reverse_proxy api:3001
   }
   reverse_proxy /* frontend:3000
 }
 EOF
+  cat "${_caddy_tmp}" | run_ssh "${APP_IP}" "bash -lc 'cat > ${APP_BASE_DIR}/Caddyfile'"
+  rm -f "${_caddy_tmp}"
 
-  docker compose up -d --build --force-recreate
-  docker compose ps
-  curl -fsS http://localhost >/dev/null
-'"
+  # Merge .env on remote: keep operator-added keys (Postmark, etc.); ensure Postgres + DATABASE_URL + APP_DOMAIN.
+  run_ssh "${APP_IP}" bash -s <<REMOTE_ENV
+set -euo pipefail
+export APP_BASE_DIR='${APP_BASE_DIR}'
+export APP_DOMAIN='${APP_DOMAIN}'
+python3 <<'PY'
+import pathlib, secrets, os
+base = pathlib.Path(os.environ["APP_BASE_DIR"])
+domain = os.environ.get("APP_DOMAIN", "localhost").strip()
+path = base / ".env"
+lines = {}
+if path.exists():
+    for line in path.read_text().splitlines():
+        s = line.strip()
+        if not s or s.startswith("#") or "=" not in s:
+            continue
+        k, v = s.split("=", 1)
+        lines[k.strip()] = v.strip()
+if "POSTGRES_PASSWORD" not in lines:
+    lines["POSTGRES_PASSWORD"] = secrets.token_hex(24)
+pw = lines["POSTGRES_PASSWORD"]
+lines["DATABASE_URL"] = "postgresql://safepsy:%s@postgres:5432/safepsy?schema=public" % (pw,)
+lines.setdefault("NODE_ENV", "production")
+lines.setdefault("PORT", "3001")
+lines["APP_DOMAIN"] = domain
+if domain not in ("localhost", "127.0.0.1"):
+    apex = domain[4:] if domain.startswith("www.") else domain
+    lines.setdefault("FRONTEND_URL", "https://%s,https://www.%s" % (apex, apex))
+path.write_text("\n".join("%s=%s" % (k, lines[k]) for k in sorted(lines.keys())) + "\n")
+print("Updated", path, "with", len(lines), "keys")
+PY
+REMOTE_ENV
+
+  run_ssh "${APP_IP}" "bash -lc '
+    set -euo pipefail
+    cd ${APP_BASE_DIR}
+    docker compose up -d --build --force-recreate
+    docker compose ps
+    curl -fsS http://localhost >/dev/null
+  '"
 fi
 
-log "STEP 6: Validate APP -> inference from APP server"
-if [[ "${ALLOW_DEGRADED_CHATBOT}" == "1" ]]; then
-  log "ALLOW_DEGRADED_CHATBOT=1: skipping APP -> inference validation"
+log "STEP 6: Validate APP -> inference from APP server (optional for landing stack)"
+if [[ "${ALLOW_DEGRADED_CHATBOT}" == "1" ]] || { [[ "${SKIP_VLLM_DEPLOY}" == "1" ]] && [[ "${REQUIRE_CHATBOT_GATE:-0}" != "1" ]]; }; then
+  log "Skipping inference validation (ALLOW_DEGRADED_CHATBOT or landing stack without REQUIRE_CHATBOT_GATE)"
   run_ssh "${APP_IP}" "bash -lc '
     set -euo pipefail
     docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps
-    docker logs --tail=120 \$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q backend) || true
+    CID=\$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q api 2>/dev/null || docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q backend 2>/dev/null || true)
+    [[ -n "\${CID}" ]] && docker logs --tail=120 "\${CID}" || true
   '"
 else
   if [[ "${SKIP_VLLM_DEPLOY}" == "1" ]]; then
@@ -519,14 +381,16 @@ else
         set -euo pipefail
         curl -fsS http://127.0.0.1:${API_PORT}${CHATBOT_HEALTH_PATH} >/dev/null
         docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps
-        docker logs --tail=80 \$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q backend) || true
+        CID=\$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q api 2>/dev/null || docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q backend 2>/dev/null || true)
+        [[ -n "\${CID}" ]] && docker logs --tail=80 "\${CID}" || true
       '"
     else
       run_ssh "${APP_IP}" "bash -lc '
         set -euo pipefail
         curl -fsS http://${API_IP}:${API_PORT}${CHATBOT_HEALTH_PATH} >/dev/null
         docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps
-        docker logs --tail=80 \$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q backend) || true
+        CID=\$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q api 2>/dev/null || docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q backend 2>/dev/null || true)
+        [[ -n "\${CID}" ]] && docker logs --tail=80 "\${CID}" || true
       '"
     fi
   elif [[ "${SINGLE_HOST}" == "1" ]]; then
@@ -534,14 +398,16 @@ else
       set -euo pipefail
       curl -fsS http://127.0.0.1:${API_PORT}/v1/models >/dev/null
       docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps
-      docker logs --tail=80 \$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q backend) || true
+      CID=\$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q api 2>/dev/null || docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q backend 2>/dev/null || true)
+      [[ -n "\${CID}" ]] && docker logs --tail=80 "\${CID}" || true
     '"
   else
     run_ssh "${APP_IP}" "bash -lc '
       set -euo pipefail
       curl -fsS http://${API_IP}:${API_PORT}/v1/models >/dev/null
       docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps
-      docker logs --tail=80 \$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q backend) || true
+      CID=\$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q api 2>/dev/null || docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q backend 2>/dev/null || true)
+      [[ -n "\${CID}" ]] && docker logs --tail=80 "\${CID}" || true
     '"
   fi
 fi
@@ -569,8 +435,7 @@ fi
 
 log "STEP 8: Final checks"
 wait_http "http://${APP_IP}" 30 2 || die "App root is not reachable at http://${APP_IP}"
-run_ssh "${APP_IP}" "bash -lc 'curl -fsS http://localhost/api/healthz && echo'"
-run_ssh "${APP_IP}" "bash -lc 'curl -fsS http://localhost/api/models >/dev/null && echo backend_to_api_ok'"
+run_ssh "${APP_IP}" "bash -lc 'curl -fsS http://localhost/api/healthz && echo landing_api_ok'"
 
 log "STEP 8b: HTTPS / domain (Caddy auto-HTTPS; requires DNS → ${APP_IP})"
 if wait_http "https://${APP_DOMAIN}" 25 3; then
@@ -584,11 +449,11 @@ cat <<EOF
 SUCCESS
 - Frontend reachable:  http://${APP_IP}
 - Domain (HTTPS):       https://${APP_DOMAIN}  (also ${CADDY_SITE_NAMES})
-- Inference URL:        $([[ "${SKIP_VLLM_DEPLOY}" == "1" ]] && echo "http://${API_IP}:${API_PORT}${CHATBOT_HEALTH_PATH} (FastAPI chatbot)" || ([[ "${SINGLE_HOST}" == "1" ]] && echo "http://127.0.0.1:${API_PORT}/v1/models (on APP) / backend uses ${MODEL_API_URL_FOR_COMPOSE}" || echo "http://${API_IP}:${API_PORT}/v1/models"))
+- API (waitlist/contact): Express + Prisma on docker service \`api\` (see ${APP_BASE_DIR}/.env for DATABASE_URL / Postmark)
 - App stack path:       ${APP_BASE_DIR}
-- Inference container:  $([[ "${SKIP_VLLM_DEPLOY}" == "1" ]] && echo "safepsy-chatbot-api (compose)" || echo "vllm")
+- Optional LLM/chatbot: set REQUIRE_CHATBOT_GATE=1 and run chatbot on :${API_PORT} if you need legacy proxy checks
 
 Useful follow-ups:
-- App logs: ssh root@${APP_IP} \"cd ${APP_BASE_DIR} && docker compose logs -f\"
-- Inference logs (SKIP_VLLM): ssh root@${VLLM_SSH_HOST} \"cd /opt/safepsy/deployment/chatbot && docker compose logs -f\"  OR  (vLLM): ssh root@${VLLM_SSH_HOST} \"docker logs -f vllm\"
+- Stack logs: ssh root@${APP_IP} \"cd ${APP_BASE_DIR} && docker compose logs -f\"
+- API logs:   ssh root@${APP_IP} \"docker logs -f \\\$(docker compose -f ${APP_BASE_DIR}/docker-compose.yml ps -q api)\"
 EOF

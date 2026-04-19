@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "dev:web": "cd apps/web && vite",
+    "dev:web:fresh": "cd apps/web && rm -rf node_modules/.vite && vite",
     "dev:api": "npm run dev -w safepsy-api",
     "dev": "concurrently -k \"npm:dev:web\" \"npm:dev:api\"",
     "dev:mobile": "npm run start -w safepsy-mobile",

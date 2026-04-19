@@ -34,9 +34,17 @@ export default defineConfig({
       },
     },
   },
+  // Pin PostCSS explicitly so Tailwind runs reliably when the dev server is started
+  // from different working directories or after hoisted dependency layout changes.
+  css: {
+    postcss: path.resolve(__dirname, 'postcss.config.cjs'),
+  },
   server: {
     port: 3000,
     host: true,
+    fs: {
+      allow: [__dirname, path.resolve(__dirname, '../..')],
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',

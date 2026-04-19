@@ -1,0 +1,5 @@
+# Local overrides: map Caddy to host port 8080 (avoids binding :80 without sudo on macOS).
+services:
+  caddy:
+    ports:
+      - "8080:80"

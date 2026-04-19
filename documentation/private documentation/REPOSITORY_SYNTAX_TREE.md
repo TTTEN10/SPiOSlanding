@@ -66,6 +66,9 @@ A tree view of the codebase where each **leaf** is a file with: **name**, **func
 ```
 apps/api/
 ├── package.json              # API deps & scripts (dev, build, test, deploy:contracts) — JSON
+├── Dockerfile                # Production image: Prisma + `tsc` build, entrypoint `db push` + `node dist` — Text
+├── docker-entrypoint.sh      # Container entry: prisma generate/db push then API — Shell
+├── .dockerignore             # Docker build context excludes — Text
 ├── nodemon.json              # Nodemon config for dev — JSON
 ├── tsconfig.json             # TypeScript config (excludes `src/contracts/**`) — JSON
 ├── tsconfig.contracts.json   # Deploy/tooling scripts under `src/contracts` — JSON
@@ -285,9 +288,10 @@ apps/web/
 │   │
 │   ├── components/
 │   │   ├── AboutMe.tsx            # About me page — TypeScript (TSX)
+│   │   ├── AlmostThere.tsx        # `/almost-there` — beta waitlist signup (shared waitlist UI) — TypeScript (TSX)
 │   │   ├── Explore.tsx            # `/explore` — mission, values, technology — TypeScript (TSX)
 │   │   ├── BetaTutorial.tsx       # Beta / onboarding tutorial — TypeScript (TSX)
-│   │   ├── ChatWidget.tsx         # Chat UI widget (guest cap + wallet persistence) — TypeScript (TSX)
+│   │   ├── ChatWidget.tsx         # Chat UI widget (guest cap + wallet persistence; guest toolbar embeds `ConnectWallet` + `#wallet-connect-region`) — TypeScript (TSX)
 │   │   ├── GuestModeLimitModal.tsx # Guest limit reached — wallet conversion — TypeScript (TSX)
 │   │   ├── ConnectWallet.tsx      # Wallet connection UI — TypeScript (TSX)
 │   │   ├── ContactUs.tsx         # Contact form — TypeScript (TSX)
@@ -304,7 +308,7 @@ apps/web/
 │   │   ├── FAQAccordion.tsx       # Reusable FAQ accordion — TypeScript (TSX)
 │   │   ├── Feedback.tsx           # User feedback UI — TypeScript (TSX)
 │   │   ├── Footer.tsx             # Site footer — TypeScript (TSX)
-│   │   ├── Header.tsx             # Site header/nav — TypeScript (TSX)
+│   │   ├── Header.tsx             # Site header: logo, home “Try beta”, theme, mobile nav (no back/Explore/wallet) — TypeScript (TSX)
 │   │   ├── Hero.tsx               # Landing hero — TypeScript (TSX)
 │   │   ├── HiddenPage.tsx         # Hidden/utility page — TypeScript (TSX)
 │   │   ├── Landing.tsx            # Main landing (`/`); “Explore” CTA → `/explore` — TypeScript (TSX)
@@ -323,6 +327,7 @@ apps/web/
 │   │   ├── TermsOfService.tsx     # ToS page — TypeScript (TSX)
 │   │   ├── Testing.tsx            # Testing page — TypeScript (TSX)
 │   │   ├── ThemeToggle.tsx        # Theme toggle — TypeScript (TSX)
+│   │   ├── WaitlistSignupSection.tsx # Shared waitlist form (landing + `/almost-there`) — TypeScript (TSX)
 │   │   └── __tests__/
 │   │       ├── ContactUs.test.tsx # ContactUs tests — TypeScript (TSX)
 │   │       ├── Hero.test.tsx      # Hero tests — TypeScript (TSX)
@@ -479,7 +484,12 @@ deploy/
 ```
 deployment/
 ├── deploy.sh                          # Terraform + chatbot compose (dedicated host, or colocated on app if SSH to chatbot fails) + deploy-app.sh — Shell
-├── deploy-app.sh                      # Application deploy (Caddy + SPA + Python proxy) — Shell
+├── deploy-app.sh                      # Application deploy: Caddy + Vite SPA + Postgres + Express API (waitlist/contact); optional chatbot gate via REQUIRE_CHATBOT_GATE — Shell
+├── run-local-landing.sh               # Docker Compose same stack as prod landing (port 8080 via `landing/docker-compose.local.yml`) — Shell
+├── landing/
+│   ├── docker-compose.yml             # postgres + api + frontend + caddy — YAML
+│   ├── docker-compose.local.yml       # Local port 8080:80 override — YAML
+│   └── frontend.Dockerfile            # Web production image (no `VITE_API_URL`; same-origin `/api`) — Text
 ├── deploy-instance-aware-roadmap.sh   # Legacy instance-aware deploy (restored; replaced by deploy.sh in commit 08de24c6e) — Shell
 ├── deploy-issue.md                    # Known deploy blockers + Scaleway / SSH checklist — Markdown
 ├── bootstrap-chatbot-host.sh          # SSH: verify host, sync chatbot slice, compose up — Shell
@@ -674,7 +684,7 @@ Some guides exist in both **public** and **private** trees (e.g. `LAUNCH.md`, on
 
 ## App flow (high level)
 
-- **Web (`apps/web`)**: React SPA → WalletContext/AuthContext (`userMode`: guest vs authenticated) → DID, chat (guest: in-memory + `mode: guest` API; verified: encrypted save/load), payment, legal, FAQ, support/feedback, and landing (`Landing.tsx`: `/`, with “Explore” linking to `/explore`; `/about-us` redirects to `/explore`; routes such as `/explore`, `/contact-us`, `/faq`, `/beta/chat`). Uses `apps/api` for API and (optionally) the AI service for chat.
+- **Web (`apps/web`)**: React SPA → WalletContext/AuthContext (`userMode`: guest vs authenticated) → DID, chat (guest: in-memory + `mode: guest` API; verified: encrypted save/load), payment, legal, FAQ, support/feedback, and landing (`Landing.tsx`: `/`, with “Explore” linking to `/explore`; primary CTAs “Start talking” / “Try beta” → `/almost-there` waitlist; `/about-us` redirects to `/explore`; routes such as `/almost-there`, `/explore`, `/contact-us`, `/faq`, `/beta/chat`). Uses `apps/api` for API and (optionally) the AI service for chat.
 - **API (`apps/api`)**: Express server → auth, did, chat, payment, subscribe, contact, rag routes; middleware for auth, quota, safety, metrics; Prisma + PostgreSQL; DID contracts on-chain.
 - **AI chatbot (`apps/ai-chatbot`)**: FastAPI + vLLM, OpenAI-compatible chat; used by API chat routes for completions/streaming.
 - **Backend / `frontend/`**: Legacy or parallel apps (contact, subscribe, simpler UI); **not** in npm `workspaces` (root workspaces are `apps/*` only).

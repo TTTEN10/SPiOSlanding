@@ -25,7 +25,7 @@ export function HomeScreen({ navigation }: Props) {
         </Text>
 
         <Pressable style={styles.btn} onPress={() => navigation.navigate('Chat')}>
-          <Text style={styles.btnText}>Start talking (no login)</Text>
+          <Text style={styles.btnText}>Start talking</Text>
         </Pressable>
         <Pressable style={styles.btnSecondary} onPress={() => navigation.navigate('Wallet')}>
           <Text style={styles.btnSecondaryText}>Create your private space</Text>

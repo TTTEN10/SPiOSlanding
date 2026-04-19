@@ -9,7 +9,7 @@ export default function Testing() {
   return (
     <div className="min-h-screen flex flex-col">
       <BetaTutorial />
-      <Header showBackButton={true} />
+      <Header />
 
       {/* Main Content */}
       <main id="main-content" className="flex-1" role="main" aria-label="AI chat" tabIndex={-1}>

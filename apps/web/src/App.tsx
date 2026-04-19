@@ -9,6 +9,7 @@ import CookieBanner from './components/CookieBanner'
 import SEOHead from './components/SEOHead'
 import TermsOfService from './components/TermsOfService'
 import Landing from './components/Landing'
+import AlmostThere from './components/AlmostThere'
 import FAQ from './components/FAQ'
 import Support from './components/Support'
 import Feedback from './components/Feedback'
@@ -65,6 +66,14 @@ export default function App() {
                 }
               />
               <Route path="/about-us" element={<Navigate to="/explore" replace />} />
+              <Route
+                path="/almost-there"
+                element={
+                  <RouteWithSEO>
+                    <AlmostThere />
+                  </RouteWithSEO>
+                }
+              />
               <Route
                 path="/explore"
                 element={
