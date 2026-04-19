@@ -31,16 +31,15 @@ export default function Landing() {
               </p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl text-heading leading-tight font-normal fade-in">
                 <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-bold">
-                  A private space to understand what you feel
+                  Feel better without giving up your story: Dr. Safe for ethical AI support, secured by wallet-based
+                  identity and encrypted continuity by design.
                 </span>
               </h1>
               <p className="text-lg sm:text-xl text-body leading-relaxed mt-6 max-w-3xl">
-                Talk with Dr.Safe without signing in. When you want continuity, your wallet becomes an ownership and
-                privacy tool — encrypted history you control, not a crypto feature.
+                No data sharing. No model training.
                 <br />
                 <br />
-                We don't train on your conversations. Guest chats stay in your browser only; wallet mode stores ciphertext,
-                not readable content, on our servers.
+                Your memories are encrypted so only you can access them through your private keys.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Link to="/almost-there" className="btn-try-beta" aria-label="Start talking">
