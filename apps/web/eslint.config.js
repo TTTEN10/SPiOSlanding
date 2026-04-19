@@ -7,7 +7,7 @@ import globals from "globals";
 /** Mirrors legacy .eslintrc.cjs: eslint:recommended + TS parser; unused vars off. */
 export default [
   {
-    ignores: ["dist", "node_modules", "**/*.cjs", "coverage"],
+    ignores: ["dist", "node_modules", ".vite", "**/.vite/**", "**/*.cjs", "coverage"],
   },
   eslint.configs.recommended,
   {

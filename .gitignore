@@ -115,10 +115,6 @@ backend/dev.db
 # Cursor local debug artifacts (never commit)
 .cursor/debug-*.log
 
-# Local-only debug logging helpers (Cursor / NDJSON ingest experiments)
-apps/api/src/lib/debug-log.ts
-backend/src/debug-log.ts
-
 # Additional security - private keys and secrets
 *.pem
 *.key
@@ -140,6 +136,8 @@ documentation/private documentation/*
 *secret*
 *credentials*
 *secrets*
+# Safe to commit: typed stub for Scaleway/env secret resolution (no credentials in file).
+!apps/api/src/lib/secret-manager.ts
 
 # Backup configuration files (may contain credentials)
 backup-config.env

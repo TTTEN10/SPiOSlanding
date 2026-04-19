@@ -3,6 +3,9 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Resolve client next to this workspace package (not repo root), so `apps/api` TypeScript
+  // resolves `@prisma/client` to the generated enums/types instead of a placeholder client.
+  output   = "./node_modules/.prisma/client"
 }
 
 datasource db {

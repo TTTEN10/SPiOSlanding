@@ -165,7 +165,6 @@ describe('Status Component', () => {
     mockFetch.mockReset()
     mockFetch
       .mockRejectedValueOnce(new Error('Endpoint 1 failed'))
-      .mockRejectedValueOnce(new Error('Endpoint 2 failed'))
       .mockImplementation(healthyFetchResponse)
 
     render(
@@ -178,8 +177,8 @@ describe('Status Component', () => {
       expect(screen.getByText(/system live/i)).toBeInTheDocument()
     })
 
-    // Should have tried at least 2 endpoints before succeeding
-    expect(mockFetch).toHaveBeenCalledTimes(3)
+    // /healthz fails then /readyz succeeds (two endpoints in Status.checkHealth)
+    expect(mockFetch).toHaveBeenCalledTimes(2)
   })
 
   it('auto-refreshes status periodically', async () => {
