@@ -27,14 +27,14 @@ export default function Landing() {
             <div className="max-w-5xl mx-auto bg-white/70 dark:bg-black/30 backdrop-blur-sm rounded-3xl border border-neutral-dark/20 dark:border-white/20 p-6 sm:p-8 lg:p-12 hover-soft-fade">
               <p className="inline-flex items-center gap-2 text-sm sm:text-base text-heading mb-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700 rounded-full px-4 py-2">
                 <Sparkles className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                Private reflection · You-first onboarding
+                Private reflection · A mindful gateway
               </p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl text-heading leading-tight font-normal fade-in">
-                <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-bold">
+                <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-bold whitespace-nowrap">
                   Feel better without giving up your story
                 </span>
               </h1>
-              <p className="text-lg sm:text-xl text-body leading-relaxed mt-6 max-w-3xl">
+              <p className="text-lg sm:text-xl text-body leading-relaxed mt-6 max-w-3xl whitespace-nowrap">
                 Dr. Safe for ethical AI support, secured by wallet-based identity and encrypted continuity by design.
               </p>
               <p className="text-lg sm:text-xl text-body leading-relaxed mt-6 max-w-3xl">
