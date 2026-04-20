@@ -30,7 +30,7 @@ export default function Landing() {
                 Private reflection · A mindful gateway
               </p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl text-heading leading-tight font-normal fade-in">
-                <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-bold whitespace-nowrap">
+                <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-bold whitespace-nowrap text-[0.85em]">
                   Feel better without giving up your story
                 </span>
               </h1>
