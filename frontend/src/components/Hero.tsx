@@ -17,7 +17,7 @@ const Hero: React.FC = () => {
                 </span>{' '}
                 with Privacy-First Technology
               </h1>
-              <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
+              <p className="text-xl text-gray-600 leading-relaxed max-w-2xl whitespace-normal break-words [text-wrap:pretty]">
                 SafePsy offers a secure, AI-assisted space for reflection and between-session support, powered by wallet-based identity and encrypted storage.
               </p>
             </div>
