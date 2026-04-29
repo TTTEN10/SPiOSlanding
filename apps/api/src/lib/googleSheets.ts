@@ -1,57 +1,54 @@
 /**
- * Google Sheets integration for logging email subscriptions
- * 
- * This service logs email addresses to a Google Sheet for easy tracking and management.
- * 
- * Setup instructions:
- * 1. Create a Google Sheet and share it with the service account email
- * 2. Get the Sheet ID from the URL: https://docs.google.com/spreadsheets/d/{SHEET_ID}/edit
- * 3. Create a service account in Google Cloud Console
- * 4. Download the service account JSON key file
- * 5. Set GOOGLE_SHEETS_CREDENTIALS to the JSON content or path to the file
- * 6. Set GOOGLE_SHEETS_ID to the Sheet ID
- * 7. Set GOOGLE_SHEETS_TAB_NAME to the tab name (default: "Subscriptions")
+ * Google Sheets integration for waitlist email storage
+ *
+ * Setup:
+ * 1. Create a tab (default name "Subscriptions") or set GOOGLE_SHEETS_TAB_NAME to an existing tab.
+ * 2. Share the spreadsheet with the service account email from the JSON key.
+ * 3. Set GOOGLE_SHEETS_CREDENTIALS to the JSON string or absolute path to the key file.
+ * 4. Optionally set GOOGLE_SHEETS_ID (defaults to the product waitlist sheet if unset).
  */
 
 import logger from './logger'
 
+/** Default spreadsheet when GOOGLE_SHEETS_ID is not set. */
+export const DEFAULT_WAITLIST_SPREADSHEET_ID =
+  '1SgLzzBLluvvgF-k55jVC8Om8JxK6Ookyp-r6KXAL-D0'
+
 export interface EmailSubscriptionData {
   email: string
-  fullName?: string | null
-  role?: string | null
   consentGiven: boolean
   timestamp: Date
 }
 
+export type WaitlistUpsertResult = 'created' | 'exists'
+
 export class GoogleSheetsService {
   private sheets: any
-  private spreadsheetId: string | null
+  private spreadsheetId: string
   private tabName: string
   private enabled: boolean
 
   constructor() {
-    this.enabled = process.env.GOOGLE_SHEETS_ENABLED === 'true'
-    this.spreadsheetId = process.env.GOOGLE_SHEETS_ID || null
+    const id = (process.env.GOOGLE_SHEETS_ID || '').trim()
+    this.spreadsheetId = id || DEFAULT_WAITLIST_SPREADSHEET_ID
     this.tabName = process.env.GOOGLE_SHEETS_TAB_NAME || 'Subscriptions'
+    const hasCreds = !!(process.env.GOOGLE_SHEETS_CREDENTIALS || '').trim()
+    this.enabled = hasCreds && !!this.spreadsheetId
 
-    if (!this.enabled) {
-      logger.info('[GOOGLE SHEETS] Service is disabled')
-      return
+    if ((process.env.GOOGLE_SHEETS_API_KEY || '').trim()) {
+      logger.warn(
+        '[GOOGLE SHEETS] GOOGLE_SHEETS_API_KEY is set, but API keys are not supported for write access. ' +
+          'Use GOOGLE_SHEETS_CREDENTIALS (service account JSON or path) and share the sheet with the service account email.'
+      )
     }
 
-    if (!this.spreadsheetId) {
-      logger.warn('[GOOGLE SHEETS] GOOGLE_SHEETS_ID not set, service will be disabled')
-      this.enabled = false
-      return
+    if (!hasCreds) {
+      logger.warn('[GOOGLE SHEETS] GOOGLE_SHEETS_CREDENTIALS not set; waitlist storage unavailable')
     }
-
-    // Lazy initialization - will be done on first use
   }
 
   private async initializeSheets(): Promise<void> {
-    if (this.sheets) {
-      return // Already initialized
-    }
+    if (this.sheets) return
 
     try {
       const { google } = await import('googleapis')
@@ -60,7 +57,6 @@ export class GoogleSheetsService {
       logger.info('[GOOGLE SHEETS] Service initialized successfully')
     } catch (error) {
       logger.error('[GOOGLE SHEETS] Failed to initialize:', error)
-      this.enabled = false
       throw error
     }
   }
@@ -84,20 +80,63 @@ export class GoogleSheetsService {
   private async getCredentials(): Promise<any> {
     const credentialsEnv = process.env.GOOGLE_SHEETS_CREDENTIALS
 
-    if (!credentialsEnv) {
+    if (!credentialsEnv?.trim()) {
       return null
     }
 
+    const validate = (creds: any) => {
+      const type = String(creds?.type || '')
+      const projectId = String(creds?.project_id || '')
+      const clientEmail = String(creds?.client_email || '')
+      const privateKey = String(creds?.private_key || '')
+
+      if (type !== 'service_account') {
+        throw new Error(
+          'Invalid GOOGLE_SHEETS_CREDENTIALS: expected a Google service account JSON (type=service_account).'
+        )
+      }
+
+      if (!clientEmail.includes('@') || !clientEmail.endsWith('.gserviceaccount.com')) {
+        throw new Error(
+          'Invalid GOOGLE_SHEETS_CREDENTIALS: client_email must be a service account email ending with .gserviceaccount.com.'
+        )
+      }
+
+      // Common misconfigurations observed:
+      // - People paste the Spreadsheet ID into project_id
+      if (projectId === DEFAULT_WAITLIST_SPREADSHEET_ID) {
+        throw new Error(
+          'Invalid GOOGLE_SHEETS_CREDENTIALS: project_id is a GCP project id, not the Google Sheet ID.'
+        )
+      }
+
+      // - People paste an API key (AIza...) instead of a PEM private key
+      if (privateKey.startsWith('AIza')) {
+        throw new Error(
+          'Invalid GOOGLE_SHEETS_CREDENTIALS: private_key looks like a Google API key (AIza...). ' +
+            'You must provide the service account PRIVATE KEY block (-----BEGIN PRIVATE KEY----- ...).'
+        )
+      }
+
+      if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
+        throw new Error(
+          'Invalid GOOGLE_SHEETS_CREDENTIALS: private_key must contain a PEM block starting with "-----BEGIN PRIVATE KEY-----".'
+        )
+      }
+    }
+
     try {
-      // Try to parse as JSON first (if it's a JSON string)
-      return JSON.parse(credentialsEnv)
+      const creds = JSON.parse(credentialsEnv)
+      validate(creds)
+      return creds
     } catch {
-      // If not JSON, try to read as file path
       try {
         const fs = await import('fs')
         const path = await import('path')
-        const credentialsPath = path.resolve(credentialsEnv)
-        return JSON.parse(fs.readFileSync(credentialsPath, 'utf8'))
+        const credentialsPath = path.resolve(credentialsEnv.trim())
+        const creds = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'))
+        validate(creds)
+        return creds
       } catch (error) {
         logger.error('[GOOGLE SHEETS] Failed to load credentials:', error)
         return null
@@ -105,62 +144,79 @@ export class GoogleSheetsService {
     }
   }
 
-  /**
-   * Log an email subscription to Google Sheets
-   */
-  async logSubscription(data: EmailSubscriptionData): Promise<void> {
-    if (!this.enabled || !this.spreadsheetId) {
-      return
-    }
-
-    try {
-      // Initialize if not already done
-      await this.initializeSheets()
-      
-      if (!this.sheets) {
-        return
-      }
-
-      // Check if headers exist, if not, create them
-      await this.ensureHeaders()
-
-      // Append the row
-      await this.sheets.spreadsheets.values.append({
-        spreadsheetId: this.spreadsheetId,
-        range: `${this.tabName}!A:E`,
-        valueInputOption: 'USER_ENTERED',
-        insertDataOption: 'INSERT_ROWS',
-        requestBody: {
-          values: [[
-            data.timestamp.toISOString(),
-            data.email,
-            data.fullName || '',
-            data.role || '',
-            data.consentGiven ? 'Yes' : 'No',
-          ]],
-        },
-      })
-
-      logger.info(`[GOOGLE SHEETS] Logged subscription for ${data.email}`)
-    } catch (error: any) {
-      // Don't throw - Google Sheets logging failures shouldn't break the subscription flow
-      logger.error(`[GOOGLE SHEETS] Failed to log subscription for ${data.email}:`, error.message || error)
-    }
+  isEnabled(): boolean {
+    return this.enabled
   }
 
   /**
-   * Ensure the sheet has headers
+   * Idempotent waitlist write: returns `exists` if email already appears in column B (data rows).
+   * Throws on API / configuration errors (caller should map to 5xx).
    */
+  async upsertWaitlistSignup(data: EmailSubscriptionData): Promise<WaitlistUpsertResult> {
+    if (!this.enabled) {
+      throw new Error('Google Sheets waitlist storage is not configured')
+    }
+
+    await this.initializeSheets()
+    if (!this.sheets) {
+      throw new Error('Google Sheets client failed to initialize')
+    }
+
+    await this.ensureHeaders()
+
+    const normalized = data.email.trim().toLowerCase()
+    const exists = await this.emailExistsInSheet(normalized)
+    if (exists) {
+      return 'exists'
+    }
+
+    await this.appendRow(data)
+    logger.info(`[GOOGLE SHEETS] Saved waitlist signup for ${normalized}`)
+    return 'created'
+  }
+
+  private async emailExistsInSheet(normalizedEmail: string): Promise<boolean> {
+    const response = await this.sheets.spreadsheets.values.get({
+      spreadsheetId: this.spreadsheetId,
+      range: `${this.tabName}!B2:B50000`,
+    })
+
+    const rows = response.data.values
+    if (!rows?.length) return false
+
+    for (const row of rows) {
+      const cell = row[0]
+      if (cell == null || cell === '') continue
+      if (String(cell).trim().toLowerCase() === normalizedEmail) return true
+    }
+    return false
+  }
+
+  private async appendRow(data: EmailSubscriptionData): Promise<void> {
+    await this.sheets.spreadsheets.values.append({
+      spreadsheetId: this.spreadsheetId,
+      range: `${this.tabName}!A:C`,
+      valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
+      requestBody: {
+        values: [
+          [
+            data.timestamp.toISOString(),
+            data.email,
+            data.consentGiven ? 'Yes' : 'No',
+          ],
+        ],
+      },
+    })
+  }
+
   private async ensureHeaders(): Promise<void> {
-    if (!this.sheets || !this.spreadsheetId) {
+    if (!this.sheets) {
       await this.initializeSheets()
-      if (!this.sheets || !this.spreadsheetId) {
-        return
-      }
+      if (!this.sheets) return
     }
 
     try {
-      // Check if first row exists and has headers
       const response = await this.sheets.spreadsheets.values.get({
         spreadsheetId: this.spreadsheetId,
         range: `${this.tabName}!A1:E1`,
@@ -168,43 +224,39 @@ export class GoogleSheetsService {
 
       const rows = response.data.values
 
-      // If no rows or headers don't match, create headers
-      if (!rows || rows.length === 0 || rows[0][0] !== 'Timestamp') {
+      const expectedAtoE = ['Timestamp', 'Email', 'Consent Given', '', '']
+      const actualRow = rows?.[0] || []
+
+      const actualAtoE = [
+        actualRow[0] ?? '',
+        actualRow[1] ?? '',
+        actualRow[2] ?? '',
+        actualRow[3] ?? '',
+        actualRow[4] ?? '',
+      ]
+
+      const matches = expectedAtoE.every((v, i) => String(actualAtoE[i] || '') === v)
+
+      if (!matches) {
         await this.sheets.spreadsheets.values.update({
           spreadsheetId: this.spreadsheetId,
           range: `${this.tabName}!A1:E1`,
           valueInputOption: 'USER_ENTERED',
           requestBody: {
-            values: [[
-              'Timestamp',
-              'Email',
-              'Full Name',
-              'Role',
-              'Consent Given',
-            ]],
+            values: [
+              expectedAtoE,
+            ],
           },
         })
         logger.info('[GOOGLE SHEETS] Created headers in sheet')
       }
     } catch (error: any) {
-      // If the sheet doesn't exist or tab doesn't exist, try to create headers anyway
-      // This will fail gracefully if permissions are wrong
       logger.warn(`[GOOGLE SHEETS] Could not check/create headers: ${error.message || error}`)
+      throw error
     }
-  }
-
-  /**
-   * Check if the service is enabled
-   */
-  isEnabled(): boolean {
-    return this.enabled
   }
 }
 
-/**
- * Factory function to create Google Sheets service
- */
 export function createGoogleSheetsService(): GoogleSheetsService {
   return new GoogleSheetsService()
 }
-
