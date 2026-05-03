@@ -2,13 +2,13 @@
 	admin off
 }
 
-# Automatic HTTPS (Let's Encrypt) when DNS A/AAAA for these names points at this host.
+# TLS + reverse proxy to the single Express app (API + static Vite build).
 safepsy.com, www.safepsy.com {
 	encode gzip
 	reverse_proxy app:3001
 }
 
-# Direct IP access (HTTP) for ops / legacy links; no TLS on bare IP.
+# Direct IP access (HTTP) for ops; no TLS on bare IP.
 http://51.159.160.246 {
 	encode gzip
 	reverse_proxy app:3001

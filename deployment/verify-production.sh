@@ -53,6 +53,13 @@ check_http_code "Backend health via Caddy" "https://${APP_DOMAIN}/api/healthz" "
 check_http_code "Direct app IP HTTP" "http://${APP_IP}" "200"
 check_http_code "Direct app IP API health" "http://${APP_IP}/api/healthz" "200"
 
+health_body="$(curl -fsS --max-time "$TIMEOUT" "https://${APP_DOMAIN}/api/healthz" 2>/dev/null || true)"
+if [[ "$health_body" == "ok" ]]; then
+  pass "Health body is plain ok (not SPA HTML)"
+else
+  failf "Health endpoint returned unexpected body (expected ok, got ${#health_body} chars — SPA fallback?)"
+fi
+
 echo
 if [[ "$fail" -eq 0 ]]; then
   echo "All production checks passed."
@@ -61,5 +68,5 @@ fi
 
 echo "$fail check(s) failed."
 echo "If needed, diagnose on app server:"
-echo "  ssh root@${APP_IP} 'cd /home/safepsy/app && docker compose ps && docker logs --tail=80 app-caddy-1 && docker logs --tail=80 app-backend-1'"
+echo "  ssh root@${APP_IP} 'cd /opt/safepsy-landing/deployment/.landing-stack && docker compose ps && docker compose logs --tail=80 caddy && docker compose logs --tail=80 app'"
 exit 1

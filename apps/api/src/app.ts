@@ -21,7 +21,6 @@ import { sanitizeMiddleware } from "./middleware/sanitize";
 import { rateLimitMiddleware } from "./lib/ratelimit";
 import { metricsMiddleware } from "./middleware/metrics";
 import { getMetrics } from "./lib/metrics";
-import { debugLog } from "./lib/debug-log";
 import { requestIdMiddleware } from "./middleware/request-id";
 
 function parseAllowedOrigins(isProd: boolean): string[] {
@@ -85,44 +84,35 @@ export function createApp() {
   const isProd = process.env.NODE_ENV === "production";
   const allowedOrigins = parseAllowedOrigins(isProd);
 
-  // #region agent log
-  debugLog({
-    runId: "pre-fix",
-    hypothesisId: "A",
-    location: "apps/api/src/app.ts:allowedOrigins",
-    message: "CORS allowlist initialized",
-    data: {
-      nodeEnv: process.env.NODE_ENV,
-      isProd,
-      allowedOriginsCount: allowedOrigins.length,
-      allowedOrigins: allowedOrigins.slice(0, 10),
+  const corsMiddleware = cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      logger.warn(`CORS blocked origin: ${origin}`);
+      return callback(null, false);
     },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-wallet-address",
+      "x-wallet-signature",
+      "x-wallet-message",
+      "x-chain-id",
+      "x-did-hash",
+    ],
+    exposedHeaders: ["X-Request-ID"],
   });
-  // #endregion
 
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) return callback(null, true);
-        logger.warn(`CORS blocked origin: ${origin}`);
-        // Avoid throwing into cors middleware (can surface as 500 on static/CSS requests with Origin)
-        return callback(null, false);
-      },
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: [
-        "Content-Type",
-        "Authorization",
-        "x-wallet-address",
-        "x-wallet-signature",
-        "x-wallet-message",
-        "x-chain-id",
-        "x-did-hash",
-      ],
-      exposedHeaders: ["X-Request-ID"],
-    })
-  );
+  // CORS only for APIs — never for static /assets (avoids env misconfig breaking CSS/JS; browsers may send Origin on module assets).
+  app.use((req, res, next) => {
+    const p = req.path;
+    if (p.startsWith("/api") || p.startsWith("/beta")) {
+      return corsMiddleware(req, res, next);
+    }
+    return next();
+  });
 
   app.use(cookieParser());
 
@@ -175,6 +165,8 @@ export function createApp() {
   app.use(metricsMiddleware);
 
   app.get("/healthz", (_req, res) => res.send("ok"));
+  // Canonical URL used by deploy scripts and monitors (must not fall through to SPA HTML).
+  app.get("/api/healthz", (_req, res) => res.type("text/plain").send("ok"));
   app.get("/readyz", (_req, res) => res.send("ready"));
   app.get("/metrics", async (_req, res) => {
     try {
@@ -208,9 +200,20 @@ export function createApp() {
 
   if (fs.existsSync(actualDist)) {
     app.use(express.static(actualDist));
-    app.get("*", (_req, res) => {
+    app.get("*", (req, res) => {
+      const p = req.path;
+      // Do not SPA-fallback for hashed bundles or other static files — returning index.html breaks MIME/types and looks like a "dead" app after deploy + stale cache.
+      if (p.startsWith("/assets/")) {
+        return res.status(404).type("text/plain").send("Not found");
+      }
+      if (/\.(js|mjs|cjs|css|map|json|woff2?|ttf|eot|svg|png|jpe?g|gif|webp|ico|avif)(\?|$)/i.test(p)) {
+        return res.status(404).type("text/plain").send("Not found");
+      }
       const indexPath = path.join(actualDist, "index.html");
-      if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
+      if (fs.existsSync(indexPath)) {
+        res.setHeader("Cache-Control", "no-cache");
+        return res.sendFile(indexPath);
+      }
       return res.status(404).json({ error: "Frontend not built. Run 'npm run build:web'" });
     });
   } else {
