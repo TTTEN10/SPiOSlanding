@@ -30,12 +30,21 @@ function parseAllowedOrigins(isProd: boolean): string[] {
     ? ["https://safepsy.com", "https://www.safepsy.com"]
     : ["http://localhost:3000", "http://localhost:3001"];
 
-  const origins = raw
+  const fromEnv = raw
     ? raw
         .split(",")
         .map((o) => o.trim())
         .filter(Boolean)
-    : defaults;
+    : [];
+
+  // Production: always union canonical public origins with FRONTEND_URL. Browsers send `Origin`
+  // on credentialed / crossorigin asset requests; if FRONTEND_URL is mis-set (e.g. leftover
+  // localhost from templates), CORS would reject and break CSS/JS loading before Express static runs.
+  const origins = isProd
+    ? Array.from(new Set([...defaults, ...fromEnv]))
+    : fromEnv.length > 0
+      ? fromEnv
+      : defaults;
 
   if (isProd) {
     for (const origin of origins) {
@@ -97,7 +106,8 @@ export function createApp() {
         if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) return callback(null, true);
         logger.warn(`CORS blocked origin: ${origin}`);
-        return callback(new Error("Not allowed by CORS"));
+        // Avoid throwing into cors middleware (can surface as 500 on static/CSS requests with Origin)
+        return callback(null, false);
       },
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
