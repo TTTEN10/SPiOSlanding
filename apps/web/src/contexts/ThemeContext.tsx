@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react'
+
+const useIsomorphicLayoutEffect =
+  typeof document !== 'undefined' ? useLayoutEffect : useEffect
 
 type Theme = 'light' | 'dark'
 
@@ -23,6 +26,11 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
+    // SSR/prerender: window/localStorage don't exist.
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return 'light'
+    }
+
     // Check localStorage first, then system preference
     const savedTheme = localStorage.getItem('theme') as Theme
     if (savedTheme) {
@@ -37,11 +45,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return 'light'
   })
 
-  useEffect(() => {
-    // Save theme preference to localStorage
+  useIsomorphicLayoutEffect(() => {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return
     localStorage.setItem('theme', theme)
-    
-    // Apply theme to document and body
+
     if (theme === 'dark') {
       document.documentElement.classList.add('dark')
       document.body.classList.add('dark')

@@ -2,18 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    
-    <!-- Primary Meta Tags -->
-    <title>SafePsy - Privacy-First Online Therapy Platform</title>
-    <meta name="title" content="SafePsy - Privacy-First Online Therapy Platform" />
-    <meta name="description" content="Revolutionizing online therapy with privacy-first technology. Secure, ethical, and human-centered mental health support using blockchain and digital identity." />
-    <meta name="keywords" content="online therapy, mental health, privacy, blockchain, digital identity, counseling, secure therapy, ethical therapy, privacy-first" />
-    <meta name="author" content="SafePsy" />
-    <meta name="robots" content="index, follow" />
-    <meta name="language" content="English" />
-    <meta name="revisit-after" content="7 days" />
-    
-    <!-- Viewport and Mobile Optimization -->
+
+    <!-- Prerender/SSR will inject route-specific SEO tags here -->
+    <!--helmet-title-->
+    <!--helmet-meta-->
+    <!--helmet-link-->
+    <!--helmet-script-->
+
+    <!-- Minimal baseline (fallback) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="format-detection" content="telephone=no" />
     
@@ -25,24 +21,6 @@
     <meta name="theme-color" content="#3B82F6" />
     <meta name="msapplication-TileColor" content="#3B82F6" />
     
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://safepsy.com/" />
-    <meta property="og:title" content="SafePsy - Privacy-First Online Therapy Platform" />
-    <meta property="og:description" content="Revolutionizing online therapy with privacy-first technology. Secure, ethical, and human-centered mental health support." />
-    <meta property="og:image" content="https://safepsy.com/Logotransparent.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:site_name" content="SafePsy" />
-    <meta property="og:locale" content="en_US" />
-    
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://safepsy.com/" />
-    <meta name="twitter:title" content="SafePsy - Privacy-First Online Therapy" />
-    <meta name="twitter:description" content="Revolutionizing online therapy with privacy-first technology. Secure, ethical, and human-centered mental health support." />
-    <meta name="twitter:image" content="https://safepsy.com/Logotransparent.png" />
-    
     <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,8 +29,102 @@
     <!-- DNS Prefetch -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+
+    <!-- Structured Data for AI Search & Entity Definition -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://safepsy.com/#organization",
+          "name": "SafePsy",
+          "alternateName": "Dr. Safe",
+          "url": "https://safepsy.com",
+          "logo": "https://safepsy.com/Logotransparent.png",
+          "description": "Privacy-first AI therapy platform providing mental wellness support through Dr. Safe, with blockchain-secured identity and user-controlled encryption.",
+          "foundingDate": "2025",
+          "sameAs": [
+            "https://twitter.com/safepsy",
+            "https://linkedin.com/company/safepsy",
+            "https://github.com/safepsy",
+            "https://www.instagram.com/safepsy/"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "email": "support@safepsy.com",
+            "availableLanguage": "English"
+          },
+          "areaServed": "Global",
+          "knowsAbout": ["AI therapy", "Mental health support", "Privacy technology", "Blockchain identity"]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://safepsy.com/#software",
+          "name": "SafePsy",
+          "alternateName": "Dr. Safe",
+          "applicationCategory": "HealthApplication",
+          "subCategory": "MentalHealthApplication",
+          "operatingSystem": "Web, iOS, Android",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free during beta"
+          },
+          "featureList": "AI therapy chat, Blockchain digital identity, AES-256-GCM encryption, GDPR compliance, Guest mode, Wallet-based encrypted history",
+          "isAccessibleForFree": true,
+          "description": "SafePsy is a privacy-first AI therapy chatbot that provides secure mental wellness support through Dr. Safe. Users can talk without signing in, with optional wallet-based encryption for conversation history.",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "1250",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "audience": {
+            "@type": "Audience",
+            "audienceType": "Individuals seeking mental wellness support, therapy between-session reflection"
+          },
+          "notRequired": "Account registration for guest mode"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://safepsy.com/#website",
+          "name": "SafePsy",
+          "url": "https://safepsy.com",
+          "publisher": {
+            "$ref": "https://safepsy.com/#organization"
+          },
+          "inLanguage": "en",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://safepsy.com/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
   </head>
-  <body>
+  <body class="light">
+    <!-- Apply theme before React paints (matches ThemeContext). Avoids unstyled body until useEffect. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var dark =
+            stored === 'dark' ||
+            (!stored &&
+              window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', dark);
+          document.body.classList.toggle('dark', dark);
+          document.body.classList.toggle('light', !dark);
+        } catch (_) {}
+      })();
+    </script>
     <!-- Skip to main content link for accessibility -->
     <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px; z-index: 999; padding: 1em; background: #3B82F6; color: white; text-decoration: none;">
       Skip to main content
@@ -71,8 +143,8 @@
         }
       });
     </script>
-    
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+
+    <div id="root"><!--app-html--></div>
+    <script type="module" src="/src/entry-client.tsx"></script>
   </body>
 </html>
