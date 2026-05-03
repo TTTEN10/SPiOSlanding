@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Shield, Heart, Users, ArrowRight, Sparkles, BadgeCheck } from 'lucide-react'
 import Header from './Header'
@@ -32,17 +32,19 @@ export default function Landing() {
               </p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl text-heading leading-tight font-normal fade-in">
                 <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-bold">
-                  A private space to understand what you feel
+                  SafePsy - AI Therapy Platform for Private Mental Wellness
                 </span>
               </h1>
-              <p className="text-lg sm:text-xl text-body leading-relaxed mt-6 max-w-3xl whitespace-normal break-words [text-wrap:pretty]">
-                Talk with Dr.Safe without signing in. When you want continuity, your wallet becomes an ownership and
-                privacy tool — encrypted history you control, not a crypto feature.
-                <br />
-                <br />
-                We don't train on your conversations. Guest chats stay in your browser only; wallet mode stores ciphertext,
-                not readable content, on our servers.
-              </p>
+              <div className="mt-6 max-w-3xl space-y-4 text-base sm:text-lg text-body leading-relaxed whitespace-normal break-words [text-wrap:pretty]">
+                <p>
+                  SafePsy is a privacy-first AI therapy chatbot for secure, judgment-free support with Dr. Safe. Chat instantly as a guest—no
+                  sign-in—or use decentralized identity to unlock encrypted conversation history that only you control.
+                </p>
+                <p>
+                  We never train on your conversations. Guest chats stay in your browser. With decentralized identity, only unreadable ciphertext
+                  is stored—your keys stay with you, never on our servers.
+                </p>
+              </div>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Link to="/beta/chat" className="btn-try-beta" aria-label="Start talking with Dr. Safe, no login">
                   Start talking (no login)
@@ -61,7 +63,7 @@ export default function Landing() {
 
           <section className="scroll-reveal" data-reveal>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl text-heading mb-8 text-center">
-              <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Why you can trust Dr. Safe</span>
+              <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Why SafePsy is the trusted AI therapy platform</span>
             </h2>
             <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-5">
               <div className="p-6 rounded-2xl border border-neutral-200 dark:border-white/20 bg-white/70 dark:bg-black/20 hover-soft-fade">
@@ -111,6 +113,22 @@ export default function Landing() {
         </Link>
       </div>
       <Footer />
+
+      {/* FAQPage Structured Data for AI Search */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": FAQ_ITEMS.map((item) => ({
+            "@type": "Question",
+            "name": item.q,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": item.a
+            }
+          }))
+        })
+      }} />
     </div>
   )
 }
