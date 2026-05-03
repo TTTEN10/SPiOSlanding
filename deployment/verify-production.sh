@@ -11,7 +11,7 @@ set -euo pipefail
 
 APP_DOMAIN="${APP_DOMAIN:-safepsy.com}"
 # Default matches prod app instance when DNS for APP_DOMAIN points here; override if needed.
-APP_IP="${APP_IP:-51.159.149.66}"
+APP_IP="${APP_IP:-51.159.160.246}"
 TIMEOUT="${TIMEOUT:-15}"
 CHECK_LLM="${CHECK_LLM:-0}"
 
