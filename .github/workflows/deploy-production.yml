@@ -34,8 +34,8 @@ jobs:
       - name: Set env
         run: |
           if [ -z "${{ secrets.DATABASE_PASSWORD }}" ]; then
-            echo "::error::DATABASE_PASSWORD secret is not set. Add it in repo Settings → Secrets."
-            exit 1
+            echo "::warning::DATABASE_PASSWORD secret is not set. Proceeding without it (deployment must rely on existing server-side .env)."
+            exit 0
           fi
           echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> $GITHUB_ENV
           echo "POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> $GITHUB_ENV
