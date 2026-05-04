@@ -6,6 +6,20 @@ import { createApp } from "../app";
 const upsertWaitlistSignup = vi.fn();
 const sheetsMockState = { enabled: true };
 
+const prismaMock = vi.hoisted(() => ({
+  findUnique: vi.fn(),
+  create: vi.fn(),
+}));
+
+vi.mock("../lib/prisma", () => ({
+  prisma: {
+    emailSubscription: {
+      findUnique: prismaMock.findUnique,
+      create: prismaMock.create,
+    },
+  },
+}));
+
 vi.mock("../lib/googleSheets", () => ({
   createGoogleSheetsService: () => ({
     isEnabled: () => sheetsMockState.enabled,
@@ -34,6 +48,10 @@ describe("POST /api/subscribe", () => {
   beforeEach(() => {
     sheetsMockState.enabled = true;
     upsertWaitlistSignup.mockReset();
+    prismaMock.findUnique.mockReset();
+    prismaMock.create.mockReset();
+    prismaMock.findUnique.mockResolvedValue(null);
+    prismaMock.create.mockResolvedValue({});
   });
 
   it("rejects invalid emails", async () => {
@@ -81,15 +99,31 @@ describe("POST /api/subscribe", () => {
     expect(upsertWaitlistSignup).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 503 when Google Sheets is not configured", async () => {
+  it("falls back to PostgreSQL when Google Sheets is not configured", async () => {
     sheetsMockState.enabled = false;
 
     const res = await request(app)
       .post("/api/subscribe")
       .send({ email: "new@example.com", consentGiven: true });
 
-    expect(res.status).toBe(503);
-    expect(res.body.success).toBe(false);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
     expect(upsertWaitlistSignup).not.toHaveBeenCalled();
+    expect(prismaMock.findUnique).toHaveBeenCalledWith({ where: { email: "new@example.com" } });
+    expect(prismaMock.create).toHaveBeenCalled();
+  });
+
+  it("falls back to PostgreSQL when Google Sheets write fails", async () => {
+    upsertWaitlistSignup.mockRejectedValueOnce(new Error("permission denied"));
+
+    const res = await request(app)
+      .post("/api/subscribe")
+      .send({ email: "fallback@example.com", consentGiven: true });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(upsertWaitlistSignup).toHaveBeenCalledTimes(1);
+    expect(prismaMock.findUnique).toHaveBeenCalledWith({ where: { email: "fallback@example.com" } });
+    expect(prismaMock.create).toHaveBeenCalled();
   });
 });

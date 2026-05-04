@@ -4,8 +4,31 @@ import { safetyMiddleware, safetyResponseInterceptor } from "../middleware/safet
 import { createEmailService } from "../lib/emailService";
 import { createGoogleSheetsService } from "../lib/googleSheets";
 import { emailSubscriptionsTotal } from "../lib/metrics";
+import { prisma } from "../lib/prisma";
+import { ipHash } from "../lib/crypto";
 
 const router = Router();
+
+async function persistWaitlistToDatabase(
+  email: string,
+  consentGiven: boolean,
+  consentTimestamp: Date,
+  clientIp: string | undefined
+): Promise<"created" | "exists"> {
+  const existing = await prisma.emailSubscription.findUnique({ where: { email } });
+  if (existing) return "exists";
+
+  const hash = clientIp ? ipHash(clientIp) : undefined;
+  await prisma.emailSubscription.create({
+    data: {
+      email,
+      consentGiven,
+      consentTimestamp,
+      ipHash: hash,
+    },
+  });
+  return "created";
+}
 
 router.use(subscriptionRateLimitMiddleware);
 
@@ -45,21 +68,29 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ success: false, message: "Consent is required" });
   }
   const consentTimestamp = new Date();
-
-  const sheets = createGoogleSheetsService();
-  if (!sheets.isEnabled()) {
-    return res.status(503).json({
-      success: false,
-      message: "Waitlist signup is temporarily unavailable. Please try again later.",
-    });
-  }
+  const clientIp =
+    (typeof req.headers["x-forwarded-for"] === "string"
+      ? req.headers["x-forwarded-for"].split(",")[0]?.trim()
+      : undefined) || req.socket.remoteAddress;
 
   try {
-    const outcome = await sheets.upsertWaitlistSignup({
-      email,
-      consentGiven,
-      timestamp: consentTimestamp,
-    });
+    const sheets = createGoogleSheetsService();
+    let outcome: "created" | "exists";
+
+    if (sheets.isEnabled()) {
+      try {
+        outcome = await sheets.upsertWaitlistSignup({
+          email,
+          consentGiven,
+          timestamp: consentTimestamp,
+        });
+      } catch (sheetsErr) {
+        console.error("Google Sheets waitlist write failed, falling back to database:", sheetsErr);
+        outcome = await persistWaitlistToDatabase(email, consentGiven, consentTimestamp, clientIp);
+      }
+    } else {
+      outcome = await persistWaitlistToDatabase(email, consentGiven, consentTimestamp, clientIp);
+    }
 
     if (outcome === "exists") {
       return res.json({
@@ -107,21 +138,6 @@ router.post("/", async (req, res) => {
     });
   } catch (e) {
     console.error("Subscription error:", e);
-    const msg = e instanceof Error ? e.message : String(e);
-    const lower = msg.toLowerCase();
-    if (
-      lower.includes("google_sheets_credentials") ||
-      lower.includes("credentials") ||
-      lower.includes("google sheets") ||
-      lower.includes("permission") ||
-      lower.includes("forbidden") ||
-      lower.includes("caller does not have permission")
-    ) {
-      return res.status(503).json({
-        success: false,
-        message: "Waitlist signup is temporarily unavailable. Please try again later.",
-      });
-    }
     res.status(500).json({ success: false, message: "Something went wrong. Please try again later." });
   }
 });
