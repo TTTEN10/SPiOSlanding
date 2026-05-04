@@ -54,7 +54,7 @@ jobs:
           # Avoid split-host defaults in deploy-safepsy.sh (API_IP=62.210.238.160, SINGLE_HOST=0),
           # which can fail when the separate API host is unreachable or not configured.
           chmod +x deployment/deploy-app.sh
-          SINGLE_HOST=1 APP_IP="${SSH_SERVER_IP}" API_IP="${SSH_SERVER_IP}" SKIP_VLLM_DEPLOY=1 bash deployment/deploy-app.sh
+          SINGLE_HOST=1 APP_IP="${SSH_SERVER_IP}" API_IP="${SSH_SERVER_IP}" SKIP_VLLM_DEPLOY=1 SSH_KEY="${SSH_KEY_FILE}" bash deployment/deploy-app.sh
 
       - name: Verify deployment
         continue-on-error: true
