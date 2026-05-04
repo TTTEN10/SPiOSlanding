@@ -8,6 +8,14 @@ name: Deploy Production
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/api/**"
+      - "apps/web/**"
+      - "deployment/**"
+      - ".github/workflows/deploy-production.yml"
 
 jobs:
   deploy:
