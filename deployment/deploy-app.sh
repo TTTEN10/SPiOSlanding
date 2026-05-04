@@ -45,6 +45,7 @@ APP_DOMAIN="${APP_DOMAIN:-safepsy.com}"
 # Hostnames Caddy will terminate TLS for (must match DNS A/AAAA to this server)
 CADDY_SITE_NAMES="${CADDY_SITE_NAMES:-safepsy.com, www.safepsy.com}"
 APP_USER="${APP_USER:-safepsy}"
+SSH_USER="${SSH_USER:-root}"
 SSH_KEY="${SSH_KEY:-}"
 SSH_CONNECT_TIMEOUT="${SSH_CONNECT_TIMEOUT:-12}"
 # When 1, deployment must not fail if chatbot/vLLM is unavailable.
@@ -103,7 +104,7 @@ die() { printf "\n[ERROR] %s\n" "$*" >&2; exit 1; }
 run_ssh() {
   local host="$1"
   shift
-  ssh "${SSH_OPTS[@]}" "root@${host}" "$@"
+  ssh "${SSH_OPTS[@]}" "${SSH_USER}@${host}" "$@"
 }
 
 wait_http() {
@@ -297,7 +298,7 @@ WORKDIR /app
 COPY . .
 # apps/web currently has strict TS errors in some files; build production bundle via Vite.
 ENV VITE_API_URL=https://${APP_DOMAIN}
-RUN npm install --legacy-peer-deps && npx vite build
+RUN npm install --legacy-peer-deps && npm run build
 RUN npm install -g serve
 CMD [\"serve\", \"-s\", \"dist\", \"-l\", \"3000\"]
 EOF
