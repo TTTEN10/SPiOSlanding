@@ -199,7 +199,19 @@ export function createApp() {
   const actualDist = fs.existsSync(dist) ? dist : fs.existsSync(frontendDist) ? frontendDist : dist;
 
   if (fs.existsSync(actualDist)) {
-    app.use(express.static(actualDist));
+    // index: false so GET / is not served by static (which would omit our HTML cache headers). SPA
+    // routes must always hit the handler below with strict no-store so deploys show new bundles.
+    app.use(
+      express.static(actualDist, {
+        index: false,
+        setHeaders(res, filePath) {
+          if (filePath.endsWith("index.html")) {
+            res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private, max-age=0");
+            res.setHeader("Pragma", "no-cache");
+          }
+        },
+      }),
+    );
     app.get("*", (req, res) => {
       const p = req.path;
       // Do not SPA-fallback for hashed bundles or other static files — returning index.html breaks MIME/types and looks like a "dead" app after deploy + stale cache.
@@ -211,7 +223,8 @@ export function createApp() {
       }
       const indexPath = path.join(actualDist, "index.html");
       if (fs.existsSync(indexPath)) {
-        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private, max-age=0");
+        res.setHeader("Pragma", "no-cache");
         return res.sendFile(indexPath);
       }
       return res.status(404).json({ error: "Frontend not built. Run 'npm run build:web'" });
