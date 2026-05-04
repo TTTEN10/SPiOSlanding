@@ -1,6 +1,6 @@
 import React from 'react'
 import { Shield, Heart, Users } from 'lucide-react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import WaitlistForm from './WaitlistForm'
 
 const Hero: React.FC = () => {
