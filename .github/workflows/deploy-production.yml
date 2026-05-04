@@ -48,10 +48,19 @@ jobs:
           ssh-keyscan -H 51.159.149.66 >> ~/.ssh/known_hosts 2>/dev/null || true
           echo "SSH_KEY_FILE=$HOME/.ssh/id_ed25519" >> $GITHUB_ENV
       
-      - name: SSH connectivity (non-root)
+      - name: SSH connectivity
         run: |
           set -euo pipefail
-          ssh -i "${SSH_KEY_FILE}" -o BatchMode=yes -o ConnectTimeout=12 -o StrictHostKeyChecking=accept-new safepsy@${SSH_SERVER_IP} 'echo "ssh ok: $(hostname)"'
+          for user in safepsy root; do
+            echo "Testing SSH as ${user}@${SSH_SERVER_IP}..."
+            if ssh -i "${SSH_KEY_FILE}" -o BatchMode=yes -o ConnectTimeout=12 -o StrictHostKeyChecking=accept-new "${user}@${SSH_SERVER_IP}" 'echo "ssh ok: $(hostname)"'; then
+              echo "SSH_USER=${user}" >> "$GITHUB_ENV"
+              echo "Using SSH_USER=${user}"
+              exit 0
+            fi
+          done
+          echo "::error::Unable to SSH as safepsy or root"
+          exit 1
 
       - name: Deploy
         run: |
@@ -59,7 +68,7 @@ jobs:
           # Avoid split-host defaults in deploy-safepsy.sh (API_IP=62.210.238.160, SINGLE_HOST=0),
           # which can fail when the separate API host is unreachable or not configured.
           chmod +x deployment/deploy-app.sh
-          SINGLE_HOST=1 APP_IP="${SSH_SERVER_IP}" API_IP="${SSH_SERVER_IP}" SKIP_VLLM_DEPLOY=1 SSH_KEY="${SSH_KEY_FILE}" SSH_USER=safepsy bash deployment/deploy-app.sh
+          SINGLE_HOST=1 APP_IP="${SSH_SERVER_IP}" API_IP="${SSH_SERVER_IP}" SKIP_VLLM_DEPLOY=1 SSH_KEY="${SSH_KEY_FILE}" SSH_USER="${SSH_USER:-root}" bash deployment/deploy-app.sh
 
       - name: Verify deployment
         continue-on-error: true
