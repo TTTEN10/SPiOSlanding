@@ -48,6 +48,28 @@ jobs:
           ssh-keyscan -H 51.159.149.66 >> ~/.ssh/known_hosts 2>/dev/null || true
           echo "SSH_KEY_FILE=$HOME/.ssh/id_ed25519" >> $GITHUB_ENV
       
+      - name: SSH diagnostics
+        run: |
+          set -euo pipefail
+          echo "== TCP reachability =="
+          (command -v nc >/dev/null 2>&1 && nc -vz -w 5 "${SSH_SERVER_IP}" 22) || true
+          (command -v curl >/dev/null 2>&1 && curl -sS --connect-timeout 5 "http://${SSH_SERVER_IP}:22" >/dev/null) || true
+          echo
+          echo "== SSH verbose attempts (safepsy, then root) =="
+          for user in safepsy root; do
+            echo
+            echo "--- ssh -vvv ${user}@${SSH_SERVER_IP} ---"
+            set +e
+            timeout 20s ssh -vvv -i "${SSH_KEY_FILE}" \
+              -o BatchMode=yes \
+              -o ConnectTimeout=12 \
+              -o StrictHostKeyChecking=accept-new \
+              "${user}@${SSH_SERVER_IP}" 'echo ok' 2>&1 | tail -n 120
+            code="${PIPESTATUS[0]}"
+            set -e
+            echo "--- exit code: ${code} ---"
+          done
+
       - name: SSH connectivity
         run: |
           set -euo pipefail
