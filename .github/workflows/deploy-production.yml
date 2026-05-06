@@ -22,7 +22,9 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     env:
-      SSH_SERVER_IP: "51.159.149.66"
+      # NOTE: safepsy.com currently resolves to 51.159.160.246 (see deployment/verify-production.sh output).
+      # Deploy must target the live app host.
+      SSH_SERVER_IP: "51.159.160.246"
       DEPLOY_VIA_RSYNC: "1"
     steps:
       - name: Checkout
