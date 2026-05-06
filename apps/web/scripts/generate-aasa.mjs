@@ -21,8 +21,23 @@ const teamId = (process.env.APPLE_TEAM_ID || process.env.VITE_APPLE_TEAM_ID || '
 const bundleId = (process.env.APPLE_BUNDLE_ID || 'com.safepsy.mobile').trim();
 
 if (!teamId || /REAL_TEAM_ID|<|>/.test(teamId)) {
-  console.error('FAIL: Missing APPLE_TEAM_ID (Apple Team ID). Example: APPLE_TEAM_ID=ABCDE12345');
-  process.exit(1);
+  if (fs.existsSync(outPath)) {
+    console.warn(
+      `WARN: Missing APPLE_TEAM_ID; leaving existing apple-app-site-association as-is: ${outPath}`
+    );
+    process.exit(0);
+  }
+
+  console.warn(
+    'WARN: Missing APPLE_TEAM_ID; writing placeholder apple-app-site-association. ' +
+      'Set APPLE_TEAM_ID=ABCDE12345 to generate a production-valid AASA.'
+  );
+  const placeholder = {
+    applinks: { apps: [], details: [{ appID: `MISSING_TEAM_ID.${bundleId}`, paths: ['*'] }] },
+  };
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, JSON.stringify(placeholder, null, 2) + '\n', 'utf8');
+  process.exit(0);
 }
 
 const aasa = {
