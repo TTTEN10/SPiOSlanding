@@ -10,7 +10,7 @@ import Landing from './components/Landing'
 import FAQ from './components/FAQ'
 import Support from './components/Support'
 import Feedback from './components/Feedback'
-import Testing from './components/Testing'
+import Register from './components/Register'
 import SEOHead from './components/SEOHead'
 import { useSEO } from './hooks/useSEO'
 import { useFocusManagement, useKeyboardNavigation } from './hooks/useFocusManagement'
@@ -110,10 +110,10 @@ export const routes: RouteObject[] = [
     ),
   },
   {
-    path: '/beta/chat',
+    path: '/register',
     element: (
       <RouteWithSEO>
-        <Testing />
+        <Register />
       </RouteWithSEO>
     ),
   },

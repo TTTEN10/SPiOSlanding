@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Shield, Heart, Users, ArrowRight, Sparkles, BadgeCheck } from 'lucide-react'
 import Header from './Header'
@@ -10,9 +9,7 @@ import { useScrollReveal } from '../hooks/useScrollReveal.ts'
 import WaitlistForm from './WaitlistForm'
 
 export default function Landing() {
-  const { isOffline } = useOffline()
-
-  const ctaLabel = useMemo(() => (isOffline ? 'Queue for later' : 'Try beta'), [isOffline])
+  useOffline()
 
   useScrollReveal()
 
@@ -37,15 +34,15 @@ export default function Landing() {
               </h1>
               <div className="mt-6 max-w-3xl mx-auto space-y-4 text-base sm:text-lg text-body leading-relaxed whitespace-normal break-words [text-wrap:pretty]">
                 <p>
-                  SafePsy is a privacy-first AI therapy chatbot for secure, judgment-free support with Dr. Safe. Chat instantly as a guest—no sign-in—or use decentralized identity to unlock encrypted conversation history that only you control.
+                  SafePsy is a privacy-first AI therapist offering secure support with Dr. Safe. Chat instantly with no sign-in, or use decentralized identity for fully encrypted conversations you control.
                 </p>
                 <p>
-                  We never train on your conversations. Guest chats stay in your browser. With decentralized identity, only unreadable ciphertext is stored—your keys stay with you, never on our servers.
+                  With decentralized identity, chats stay in your browser and encrypted history is stored as unreadable data your keys, your control. We never train on your data.
                 </p>
               </div>
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                <Link to="/beta/chat" className="btn-try-beta" aria-label="Start talking with Dr. Safe, no login">
-                  Start talking (no login)
+                <Link to="/register" className="btn-try-beta" aria-label="Go to SafePsy registration">
+                  Register
                   <ArrowRight className="w-5 h-5 shrink-0" aria-hidden="true" />
                 </Link>
                 <Link
@@ -102,11 +99,11 @@ export default function Landing() {
       </main>
       <div className="fixed bottom-4 right-4 z-40">
         <Link
-          to="/beta/chat"
+          to="/register"
           className="btn-try-beta"
-          aria-label="Try SafePsy beta chat"
+          aria-label="Go to SafePsy registration"
         >
-          {ctaLabel}
+          Register
           <ArrowRight className="w-5 h-5 shrink-0" aria-hidden="true" />
         </Link>
       </div>

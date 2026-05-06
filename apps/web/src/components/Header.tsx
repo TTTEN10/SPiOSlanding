@@ -49,8 +49,8 @@ const Header: React.FC<HeaderProps> = ({ showBackButton = false }) => {
 
           {/* Primary action (desktop & mobile) */}
           {showTryBeta ? (
-            <Link to="/beta/chat" className="btn-try-beta" aria-label="Try SafePsy beta chat">
-              Try beta
+            <Link to="/register" className="btn-try-beta" aria-label="Go to SafePsy registration">
+              Register
               <ArrowRight className="w-5 h-5 shrink-0" aria-hidden="true" />
             </Link>
           ) : (

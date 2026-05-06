@@ -109,7 +109,7 @@ export function createApp() {
   // CORS only for APIs — never for static /assets (avoids env misconfig breaking CSS/JS; browsers may send Origin on module assets).
   app.use((req, res, next) => {
     const p = req.path;
-    if (p.startsWith("/api") || p.startsWith("/beta")) {
+    if (p.startsWith("/api")) {
       return corsMiddleware(req, res, next);
     }
     return next();
@@ -189,7 +189,15 @@ export function createApp() {
     app.use("/api/testing", (_req, res) => res.status(404).json({ error: "Not found" }));
   }
   app.use("/api/auth", auth);
-  app.use("/beta", betaChat);
+
+  // This repo is deployed as the public landing + waitlist. The beta chatbot must not be reachable
+  // from production even if someone guesses the URL.
+  const enableBetaChat = !isProd && process.env.ENABLE_BETA_CHAT !== "0";
+  if (enableBetaChat) {
+    app.use("/beta", betaChat);
+  } else {
+    app.use("/beta", (_req, res) => res.status(404).json({ error: "Not found" }));
+  }
   app.use("/api/chat", chat);
   app.use("/api/did", did);
   app.use("/api/payment", payment);
