@@ -1,0 +1,34 @@
+# SafePsy
+
+> Privacy-first AI therapy platform providing mental wellness support through Dr. Safe,
+> with blockchain-secured identity and user-controlled encryption.
+
+## What is SafePsy?
+
+SafePsy is a privacy-first AI therapy chatbot that provides secure mental wellness support through Dr. Safe, an AI assistant designed for reflection between therapy sessions or when exploring emotions for the first time. Unlike traditional therapy platforms, SafePsy uses blockchain-secured digital identity and AES-256-GCM encryption to ensure users own and control their conversation data.
+
+## Core Pages
+
+- [Homepage](https://safepsy.com/) - AI therapy platform for private mental wellness support
+- [Explore](https://safepsy.com/explore) - Mission, values, and technology
+- [FAQ](https://safepsy.com/faq) - Frequently asked questions about SafePsy and AI therapy
+- [Security & Privacy](https://safepsy.com/sap-policy) - Data protection and GDPR compliance
+- [Contact](https://safepsy.com/contact-us) - Support and partnerships
+- [Terms of Service](https://safepsy.com/tos) - Terms and conditions
+- [DPIA](https://safepsy.com/dpia) - Data Protection Impact Assessment
+
+## Key Facts
+
+- **Category**: AI Therapy Chatbot / Mental Health Application
+- **AI Assistant**: Dr. Safe
+- **Privacy**: AES-256-GCM encryption, user-controlled keys, no training on user conversations
+- **Identity**: Blockchain-secured digital identity (DID) on Sepolia Testnet
+- **Compliance**: GDPR-compliant measures, HIPAA-style safeguards
+- **Pricing**: Free during beta
+
+## API / Integration
+
+- Guest mode: No account required, conversations stay in browser
+- Wallet mode: Encrypted conversation history with user-controlled keys
+- Data export: Users can export their chat data at any time
+- Data deletion: Users can delete their data at any time

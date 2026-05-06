@@ -4,8 +4,7 @@
  */
 
 import { decrypt } from './encryption';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { apiUrl } from '../config/api'
 
 interface ChatRetrievalResult {
   success: boolean;
@@ -45,7 +44,7 @@ export async function retrieveChatData(
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/chat/load`, {
+    const response = await fetch(apiUrl('/chat/load'), {
       method: 'GET',
       headers,
       credentials: 'include',

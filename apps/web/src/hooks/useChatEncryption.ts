@@ -8,8 +8,7 @@ import {
   encryptChatHistory,
   decryptChatHistory,
 } from '../utils/did-encryption';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { apiUrl } from '../config/api'
 
 interface ChatMessage {
   id: string;
@@ -64,7 +63,7 @@ export function useChatEncryption() {
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/did/info`, {
+        const response = await fetch(apiUrl('/did/info'), {
           method: 'GET',
           headers,
           credentials: 'include',
@@ -130,7 +129,7 @@ export function useChatEncryption() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const didInfoResponse = await fetch(`${API_BASE_URL}/api/did/info`, {
+      const didInfoResponse = await fetch(apiUrl('/did/info'), {
         method: 'GET',
         headers,
         credentials: 'include',
@@ -192,7 +191,7 @@ export function useChatEncryption() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/chat/load`, {
+      const response = await fetch(apiUrl('/chat/load'), {
         method: 'GET',
         headers,
         credentials: 'include',
@@ -247,7 +246,7 @@ export function useChatEncryption() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/chat/save`, {
+      const response = await fetch(apiUrl('/chat/save'), {
         method: 'POST',
         headers,
         credentials: 'include',

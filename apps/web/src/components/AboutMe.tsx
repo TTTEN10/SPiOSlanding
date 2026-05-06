@@ -9,8 +9,7 @@ import { exportChatData } from '../utils/chat-retrieval';
 import { updateChatDataReference, getDIDProfile } from '../utils/did-contract';
 import { decryptSymmetricKey } from '../utils/did-encryption';
 import { ethers } from 'ethers';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { apiUrl } from '../config/api'
 
 interface DIDProfile {
   owner: string;
@@ -86,7 +85,7 @@ export default function AboutMe() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/did/info`, {
+      const response = await fetch(apiUrl('/did/info'), {
         method: 'GET',
         headers,
         credentials: 'include',
@@ -340,7 +339,7 @@ export default function AboutMe() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/chat/load`, {
+      const response = await fetch(apiUrl('/chat/load'), {
         method: 'GET',
         headers,
         credentials: 'include',

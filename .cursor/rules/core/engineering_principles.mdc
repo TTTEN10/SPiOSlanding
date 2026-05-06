@@ -11,3 +11,22 @@ alwaysApply: true
 - Validate behavior before and after deploy.
 - Do not assume environment state; verify it directly.
 - Check running services before modifying configs or scripts.
+
+## Laws (curated)
+
+- **Conway's Law**: Design systems that mirror team communication pathways.
+- **Hyrum's Law**: Treat published API/behavior as contractual once users depend on it.
+- **The Boy Scout Rule**: Leave the codebase better than you found it.
+- **YAGNI**: Don't add functionality until it is necessary.
+- **Law of Unintended Consequences**: After changes to complex systems, expect surprises and test thoroughly.
+- **Broken Windows Theory**: Repair broken windows promptly (bad code/design/decisions).
+- **Technical Debt**: Keep technical debt visible and from slowing development.
+- **Testing Pyramid**: Prefer many fast unit tests; keep integration/UI tests minimal.
+- **DRY (Don't Repeat Yourself)**: Maintain a single, unambiguous source of truth.
+- **KISS (Keep It Simple, Stupid)**: Prefer the simplest design that meets current needs.
+- **SOLID Principles**: Apply SOLID to keep code maintainable and scalable.
+- **Law of Leaky Abstractions**: Assume abstractions are leaky; validate assumptions at boundaries.
+
+## Reference
+
+- See `.cursor/laws-of-software-engineering.md` for the full set of software-engineering “laws” (with links to sources).

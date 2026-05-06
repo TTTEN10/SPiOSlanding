@@ -22,15 +22,15 @@ const defaultImage = `${baseUrl}/Logotransparent.png`;
 
 export const seoConfig: Record<string, SEOConfig> = {
   '/': {
-    title: 'SafePsy | Safe Psychological Support With Dr. Safe',
-    description: 'A safe, inclusive and research-backed mental health product experience. Chat with Dr. Safe, reduce anxiety, and keep control of your data.',
-    keywords: 'SafePsy, Dr. Safe, mental health support, AI therapy support, privacy-first therapy, beta',
-    ogTitle: 'SafePsy | Safe Psychological Support With Dr. Safe',
-    ogDescription: 'A safe, inclusive and research-backed mental health product experience with trust-first design.',
+    title: 'SafePsy - AI Therapy Chatbot for Private Mental Wellness Support',
+    description: 'SafePsy is a privacy-first AI therapy chatbot providing secure mental wellness support through Dr. Safe. Blockchain-secured identity, user-controlled encryption, GDPR-compliant. Talk without signing in.',
+    keywords: 'SafePsy, AI therapy, AI therapy chatbot, psychologist chatbot, online therapy chatbot, mental health chatbot, therapy bot, AI counselor, virtual therapist, Dr. Safe, mental health support, privacy-first therapy, encrypted therapy',
+    ogTitle: 'SafePsy - AI Therapy Chatbot for Private Mental Wellness',
+    ogDescription: 'SafePsy is a privacy-first AI therapy chatbot providing secure mental wellness support through Dr. Safe. Talk without signing in, encrypted history you control.',
     ogImage: defaultImage,
     ogUrl: baseUrl,
-    twitterTitle: 'Mental Health, Rebuilt on Privacy',
-    twitterDescription: 'Privacy-first mental wellness platform: ethical AI, blockchain-secured identity, and encrypted storage with user-controlled keys.',
+    twitterTitle: 'SafePsy - AI Therapy Platform for Private Mental Wellness',
+    twitterDescription: 'Privacy-first AI therapy chatbot: ethical AI support (Dr. Safe), blockchain-secured identity, encrypted storage with user-controlled keys. Not a replacement for licensed therapy.',
     twitterImage: defaultImage,
     twitterCard: 'summary_large_image',
     canonical: baseUrl,
@@ -50,15 +50,15 @@ export const seoConfig: Record<string, SEOConfig> = {
     canonical: `${baseUrl}/feedback`,
   },
   '/explore': {
-    title: 'Explore SafePsy | Mission, values, and technology',
-    description: 'Learn about SafePsy\'s mission to revolutionize mental health care with privacy-first technology. Meet our team and discover our commitment to ethical, secure therapy.',
-    keywords: 'SafePsy explore, about SafePsy, mental health team, privacy-first therapy, ethical therapy, secure counseling, mental health mission',
-    ogTitle: 'Explore SafePsy | Privacy-First Mental Health Platform',
-    ogDescription: 'Learn about SafePsy\'s mission to revolutionize mental health care with privacy-first technology.',
+    title: 'About SafePsy - AI Therapy Platform Mission & Technology',
+    description: 'Learn about SafePsy, a privacy-first AI therapy chatbot providing secure mental wellness support through Dr. Safe. Discover our mission, ethical AI approach, and blockchain-secured identity technology.',
+    keywords: 'SafePsy explore, about SafePsy, AI therapy platform, mental health team, privacy-first therapy, ethical AI therapy, secure counseling, mental health mission, psychologist chatbot',
+    ogTitle: 'About SafePsy - AI Therapy Platform Mission & Technology',
+    ogDescription: 'Learn about SafePsy\'s mission to revolutionize mental health care with privacy-first AI therapy and blockchain-secured identity.',
     ogImage: defaultImage,
     ogUrl: `${baseUrl}/explore`,
-    twitterTitle: 'Explore SafePsy | Privacy-First Mental Health',
-    twitterDescription: 'Learn about SafePsy\'s mission to revolutionize mental health care with privacy-first technology.',
+    twitterTitle: 'About SafePsy - AI Therapy Platform',
+    twitterDescription: 'Learn about SafePsy\'s mission to revolutionize mental health care with privacy-first AI therapy and blockchain-secured identity.',
     twitterImage: defaultImage,
     twitterCard: 'summary_large_image',
     canonical: `${baseUrl}/explore`,
@@ -279,3 +279,12 @@ export const seoConfig: Record<string, SEOConfig> = {
     canonical: `${baseUrl}/404`,
   },
 };
+
+// Routes we want crawlers to see as fully-rendered HTML in "View Source".
+// This is intentionally limited to stable, public marketing/support pages.
+export const prerenderRoutes = Object.keys(seoConfig).filter((p) => {
+  if (p === '*' || p.startsWith('/internal/admin/')) return false
+  if (p.startsWith('/app/')) return false
+  if (p.startsWith('/beta/')) return false
+  return true
+})

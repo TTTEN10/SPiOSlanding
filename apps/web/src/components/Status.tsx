@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { CheckCircle, XCircle, Loader2, Activity } from 'lucide-react'
 import Header from './Header'
 import Footer from './Footer'
+import { getApiBaseUrl } from '../config/api'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = getApiBaseUrl()
 const MAX_AUTO_REFRESHES = 10; // Maximum number of automatic refreshes
 
 interface HealthStatus {

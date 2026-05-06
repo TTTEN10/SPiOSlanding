@@ -53,6 +53,12 @@ export const contactMessagesTotal = new Counter({
   registers: [register],
 });
 
+export const feedbackSubmissionsTotal = new Counter({
+  name: 'feedback_submissions_total',
+  help: 'Total number of feedback submissions',
+  registers: [register],
+});
+
 export const activeConnections = new Gauge({
   name: 'active_connections',
   help: 'Number of active connections',

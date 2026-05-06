@@ -6,6 +6,7 @@ import { useOffline } from '../hooks/useOffline'
 import { useToast } from '../hooks/useToast'
 import { getActionableErrorMessage, fetchWithErrorHandling } from '../utils/errorMessages'
 import { offlineQueue } from '../utils/queueManager'
+import { apiUrl } from '../config/api'
 
 interface ContactResponse {
   success: boolean
@@ -73,7 +74,7 @@ const ContactUs: React.FC = () => {
 
     if (isOffline) {
       offlineQueue.add(
-        `${import.meta.env.VITE_API_URL || '/api'}/contact`,
+        apiUrl('/contact'),
         {
           method: 'POST',
           headers: {
@@ -102,7 +103,7 @@ const ContactUs: React.FC = () => {
 
     try {
       const response = await fetchWithErrorHandling(
-        `${import.meta.env.VITE_API_URL || '/api'}/contact`,
+        apiUrl('/contact'),
         {
           method: 'POST',
           headers: {

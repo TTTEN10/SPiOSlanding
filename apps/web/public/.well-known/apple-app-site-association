@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appID": "<REAL_TEAM_ID>.com.safepsy.mobile",
+        "appID": "REPLACE_ME.com.safepsy.mobile",
         "paths": ["*"]
       }
     ]

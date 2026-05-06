@@ -4,6 +4,7 @@ import {
   SUPPORTED_CHAIN_ID,
   SUPPORTED_CHAIN_ID_HEX,
 } from '../config/supportedChain';
+import { getApiBaseUrl } from '../config/api'
 
 type WalletConnectProvider = {
   accounts: string[];
@@ -47,7 +48,7 @@ interface WalletProviderProps {
 }
 
 // Use empty string when not set: same-origin requests use Vite proxy (dev) or Caddy (prod)
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE_URL = getApiBaseUrl()
 const WALLETCONNECT_PROJECT_ID = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || '';
 /** Sepolia chain params for wallet_addEthereumChain (when chain not in wallet) */
 const SEPOLIA_CHAIN_PARAMS = {

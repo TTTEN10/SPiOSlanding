@@ -13,6 +13,7 @@ import {
   SUPPORTED_CHAIN_ID_HEX,
   SUPPORTED_NETWORK_NAME,
 } from '../config/supportedChain';
+import { getApiBaseUrl } from '../config/api'
 
 // ============================================================================
 // Types & Interfaces
@@ -111,10 +112,10 @@ interface SafePsyConfig {
  * Get configuration from environment or defaults
  */
 function getConfig(): Required<SafePsyConfig> {
+  // SSR / non-Vite usage: allow explicit env, otherwise default to same-origin.
+  const defaultApiBase = typeof window !== 'undefined' ? getApiBaseUrl() : (process.env.VITE_API_URL || '/api')
   return {
-    apiBaseUrl: typeof window !== 'undefined' 
-      ? (import.meta.env?.VITE_API_URL || 'http://localhost:3001')
-      : process.env.VITE_API_URL || 'http://localhost:3001',
+    apiBaseUrl: defaultApiBase,
     didContractAddress: typeof window !== 'undefined'
       ? (import.meta.env?.VITE_DID_IDENTITY_TOKEN_ADDRESS || '')
       : process.env.VITE_DID_IDENTITY_TOKEN_ADDRESS || '',

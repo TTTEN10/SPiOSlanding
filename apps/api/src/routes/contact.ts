@@ -68,6 +68,13 @@ router.post("/", async (req, res) => {
   const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0] || req.socket.remoteAddress || "";
 
   try {
+    if (!process.env.DATABASE_URL) {
+      return res.status(503).json({
+        success: false,
+        message:
+          "Contact form is temporarily unavailable in this environment. Configure DATABASE_URL (recommended: run docker compose -f docker-compose.local.yml up) and try again.",
+      });
+    }
     await prisma.contactMessage.create({
       data: {
         email,
@@ -114,6 +121,14 @@ router.post("/", async (req, res) => {
     });
   } catch (e) {
     console.error('Contact form error:', e);
+    const msg = e instanceof Error ? e.message : '';
+    if (/DATABASE_URL|Prisma|P1001|ECONNREFUSED|connect/i.test(msg)) {
+      return res.status(503).json({
+        success: false,
+        message:
+          "Contact form storage is not reachable. Ensure Postgres is running and DATABASE_URL is set (see docker-compose.local.yml), then retry.",
+      });
+    }
     res.status(500).json({ success: false, message: "Something went wrong. Please try again later." });
   }
 });

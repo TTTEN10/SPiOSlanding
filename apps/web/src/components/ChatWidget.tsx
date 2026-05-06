@@ -11,6 +11,7 @@ import { getActionableErrorMessage } from '../utils/errorMessages';
 import Paywall from './Paywall';
 import EmptyState from './EmptyState';
 import GuestModeLimitModal from './GuestModeLimitModal';
+import { apiUrl } from '../config/api'
 
 interface Message {
   id: string;
@@ -42,8 +43,6 @@ interface PaywallData {
   };
   paymentRecipient: string | null;
 }
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const MAX_MESSAGE_LENGTH = 2000;
 const EDIT_WINDOW_MS = 30000; // 30 seconds
@@ -124,7 +123,7 @@ export default function ChatWidget() {
       headers['x-wallet-address'] = wallet.address;
       headers['x-chain-id'] = wallet.chainId.toString();
 
-      const response = await fetch(`${API_BASE_URL}/api/chat/concurrency`, {
+      const response = await fetch(apiUrl('/chat/concurrency'), {
         method: 'GET',
         headers,
       });
@@ -414,7 +413,7 @@ export default function ChatWidget() {
       }
 
       // Build URL with withContext query parameter if needed
-      const chatUrl = new URL(`${API_BASE_URL}/api/chat/completions`);
+      const chatUrl = new URL(apiUrl('/chat/completions'));
       if (withContext) {
         chatUrl.searchParams.set('withContext', 'true');
       }
@@ -507,7 +506,7 @@ export default function ChatWidget() {
                 headers['Authorization'] = `Bearer ${token}`;
               }
 
-              const saveResponse = await fetch(`${API_BASE_URL}/api/chat/save`, {
+              const saveResponse = await fetch(apiUrl('/chat/save'), {
                 method: 'POST',
                 headers,
                 credentials: 'include',

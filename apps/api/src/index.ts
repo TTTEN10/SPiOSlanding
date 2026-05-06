@@ -3,6 +3,7 @@ import path from "path";
 
 import logger from "./lib/logger";
 import { initializeConfig } from "./lib/config";
+import { createGoogleSheetsService } from "./lib/googleSheets";
 import { cryptoPaymentService } from "./lib/crypto-payment.service";
 import { startLlmUpstreamHealthPoller } from "./lib/llm-upstream-health";
 import { createApp } from "./app";
@@ -93,6 +94,17 @@ try {
           logger.info('   Set CRYPTO_PAYMENT_CONTRACT_ADDRESS in your .env file');
         }
         logger.warn('   Crypto payments will not work until both are configured.');
+      }
+
+      const sheets = createGoogleSheetsService();
+      if (sheets.isEnabled()) {
+        logger.warn(
+          "[GOOGLE SHEETS] Enabled — waitlist signups are written to Google Sheets (falls back to Postgres if the API errors)."
+        );
+      } else {
+        logger.warn(
+          "[GOOGLE SHEETS] Disabled — waitlist emails only go to Postgres. Set GOOGLE_SHEETS_CREDENTIALS_FILE or GOOGLE_SHEETS_CREDENTIALS and share the spreadsheet with the service account email."
+        );
       }
     } catch (callbackError) {
       logger.error('Error in server callback:', callbackError);

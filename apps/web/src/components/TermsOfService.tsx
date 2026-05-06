@@ -109,6 +109,30 @@ const TermsOfService: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Waitlist and product updates */}
+                <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 lg:p-12 shadow-lg border border-neutral-dark/20 dark:bg-black/30 dark:border-white/20">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl text-heading mb-6">
+                    <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
+                      2A. Waitlist and Product Updates (Email Collection)
+                    </span>
+                  </h2>
+                  <div className="space-y-4 text-body">
+                    <p>
+                      If you choose to join the SafePsy waitlist, we collect and process your personal data to register your request and send you product updates.
+                    </p>
+                    <ul className="list-disc list-inside space-y-2 ml-4">
+                      <li><strong>Data collected:</strong> your email address and a record of your consent (timestamp). We may also process limited technical metadata necessary to operate and secure the service (e.g. request identifiers and rate limiting).</li>
+                      <li><strong>Purpose:</strong> to add you to the waitlist and communicate product updates related to SafePsy.</li>
+                      <li><strong>Legal basis:</strong> your consent. You can withdraw at any time by using the unsubscribe option in emails or contacting us.</li>
+                      <li><strong>Storage:</strong> waitlist entries may be stored in our systems (e.g. database) and/or in a managed spreadsheet used for waitlist operations.</li>
+                      <li><strong>Retention:</strong> we retain waitlist data only as long as needed for the waitlist and product updates, or until you withdraw consent, unless a longer retention is required by law.</li>
+                    </ul>
+                    <p>
+                      For details on safeguards and your data protection rights, please review the Security and Privacy Policy.
+                    </p>
+                  </div>
+                </div>
+
                 {/* Key Management and User Responsibility */}
                 <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 lg:p-12 shadow-lg border border-neutral-dark/20 dark:bg-black/30 dark:border-white/20">
                   <h2 className="text-2xl sm:text-3xl lg:text-4xl text-heading mb-6">

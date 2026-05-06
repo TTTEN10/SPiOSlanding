@@ -3,10 +3,15 @@
  *
  * Setup:
  * 1. Create a tab (default name "Subscriptions") or set GOOGLE_SHEETS_TAB_NAME to an existing tab.
- * 2. Share the spreadsheet with the service account email from the JSON key.
- * 3. Set GOOGLE_SHEETS_CREDENTIALS to the JSON string or absolute path to the key file.
- * 4. Optionally set GOOGLE_SHEETS_ID (defaults to the product waitlist sheet if unset).
+ * 2. Share the spreadsheet with the service account email from the JSON key (Editor).
+ * 3. Set either:
+ *    - GOOGLE_SHEETS_CREDENTIALS_FILE — absolute path to the service account JSON (best for Docker: mount a secret file), or
+ *    - GOOGLE_SHEETS_CREDENTIALS — full JSON string, or path to a JSON file (private_key may use \n for newlines in .env)
+ * 4. Optionally set GOOGLE_SHEETS_ID (defaults in code if unset).
  */
+
+import fs from 'fs'
+import path from 'path'
 
 import logger from './logger'
 
@@ -32,7 +37,25 @@ export class GoogleSheetsService {
     const id = (process.env.GOOGLE_SHEETS_ID || '').trim()
     this.spreadsheetId = id || DEFAULT_WAITLIST_SPREADSHEET_ID
     this.tabName = process.env.GOOGLE_SHEETS_TAB_NAME || 'Subscriptions'
-    const hasCreds = !!(process.env.GOOGLE_SHEETS_CREDENTIALS || '').trim()
+
+    const fileEnv = (process.env.GOOGLE_SHEETS_CREDENTIALS_FILE || '').trim()
+    const inlineOrPath = (process.env.GOOGLE_SHEETS_CREDENTIALS || '').trim()
+
+    let hasCreds = false
+    if (fileEnv) {
+      const abs = path.resolve(fileEnv)
+      if (fs.existsSync(abs)) {
+        hasCreds = true
+      } else {
+        logger.warn(
+          `[GOOGLE SHEETS] GOOGLE_SHEETS_CREDENTIALS_FILE points to a missing file: ${abs}. ` +
+            'Waitlist will fall back to the database only.'
+        )
+      }
+    } else if (inlineOrPath) {
+      hasCreds = true
+    }
+
     this.enabled = hasCreds && !!this.spreadsheetId
 
     if ((process.env.GOOGLE_SHEETS_API_KEY || '').trim()) {
@@ -43,7 +66,10 @@ export class GoogleSheetsService {
     }
 
     if (!hasCreds) {
-      logger.warn('[GOOGLE SHEETS] GOOGLE_SHEETS_CREDENTIALS not set; waitlist storage unavailable')
+      logger.warn(
+        '[GOOGLE SHEETS] No credentials: set GOOGLE_SHEETS_CREDENTIALS_FILE (recommended in Docker) or ' +
+          'GOOGLE_SHEETS_CREDENTIALS. Without them, /api/subscribe stores signups in Postgres only.'
+      )
     }
   }
 
@@ -78,13 +104,12 @@ export class GoogleSheetsService {
   }
 
   private async getCredentials(): Promise<any> {
-    const credentialsEnv = process.env.GOOGLE_SHEETS_CREDENTIALS
-
-    if (!credentialsEnv?.trim()) {
-      return null
-    }
-
     const validate = (creds: any) => {
+      if (creds?.private_key && typeof creds.private_key === 'string') {
+        // .env one-line JSON often stores newlines as the two-char sequence \n
+        creds.private_key = creds.private_key.replace(/\\n/g, '\n')
+      }
+
       const type = String(creds?.type || '')
       const projectId = String(creds?.project_id || '')
       const clientEmail = String(creds?.client_email || '')
@@ -125,20 +150,38 @@ export class GoogleSheetsService {
       }
     }
 
+    const fileFromEnv = (process.env.GOOGLE_SHEETS_CREDENTIALS_FILE || '').trim()
+    if (fileFromEnv) {
+      try {
+        const credentialsPath = path.resolve(fileFromEnv)
+        const raw = fs.readFileSync(credentialsPath, 'utf8')
+        const creds = JSON.parse(raw)
+        validate(creds)
+        return creds
+      } catch (error) {
+        logger.error('[GOOGLE SHEETS] Failed to load GOOGLE_SHEETS_CREDENTIALS_FILE:', error)
+        return null
+      }
+    }
+
+    const credentialsEnv = (process.env.GOOGLE_SHEETS_CREDENTIALS || '').trim()
+    if (!credentialsEnv) {
+      return null
+    }
+
     try {
       const creds = JSON.parse(credentialsEnv)
       validate(creds)
       return creds
     } catch {
       try {
-        const fs = await import('fs')
-        const path = await import('path')
-        const credentialsPath = path.resolve(credentialsEnv.trim())
-        const creds = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'))
+        const credentialsPath = path.resolve(credentialsEnv)
+        const raw = fs.readFileSync(credentialsPath, 'utf8')
+        const creds = JSON.parse(raw)
         validate(creds)
         return creds
       } catch (error) {
-        logger.error('[GOOGLE SHEETS] Failed to load credentials:', error)
+        logger.error('[GOOGLE SHEETS] Failed to load credentials (not valid JSON and not a readable file path):', error)
         return null
       }
     }

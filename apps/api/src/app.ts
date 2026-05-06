@@ -7,6 +7,7 @@ import fs from "fs";
 
 import subscribe from "./routes/subscribe";
 import contact from "./routes/contact";
+import feedback from "./routes/feedback";
 import testing from "./routes/testing";
 import chat from "./routes/chat";
 import betaChat from "./routes/beta-chat";
@@ -181,6 +182,7 @@ export function createApp() {
 
   app.use("/api/subscribe", subscribe);
   app.use("/api/contact", contact);
+  app.use("/api/feedback", feedback);
   if (!isProd) {
     app.use("/api/testing", testing);
   } else {

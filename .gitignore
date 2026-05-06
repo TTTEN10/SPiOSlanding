@@ -16,6 +16,7 @@ yarn-error.log*
 # Production builds
 dist/
 build/
+apps/web/dist-ssr/
 
 # Environment variables and configuration files with credentials
 .env
@@ -191,6 +192,8 @@ apps/api/artifacts/
 *-service-account*.json
 google-credentials.json
 service-account*.json
+.env.google-sheets.json
+deployment/.landing-stack/google-sheets-sa.json
 
 # AWS credentials
 .aws/
@@ -220,3 +223,7 @@ id_dsa_*
 ssh_key
 ssh-key
 # Note: *.pem and *.key are already covered above
+
+# SEO audit temporary files (auto-generated snapshots)
+.tmp-seo-audit/
+.tmp-claude-seo/

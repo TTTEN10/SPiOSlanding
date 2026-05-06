@@ -33,6 +33,11 @@ services:
       FRONTEND_URL: ${FRONTEND_URL}
       SCALEWAY_SECRET_MANAGER_ENABLED: "false"
       SAFEPSY_LANDING_ONLY: "true"
+      GOOGLE_SHEETS_ID: "1SgLzzBLluvvgF-k55jVC8Om8JxK6Ookyp-r6KXAL-D0"
+      GOOGLE_SHEETS_TAB_NAME: "Subscriptions"
+      GOOGLE_SHEETS_CREDENTIALS_FILE: "/run/secrets/google-sheets-sa.json"
+    secrets:
+      - google-sheets-sa.json
     depends_on:
       db:
         condition: service_healthy
@@ -55,3 +60,7 @@ volumes:
   landing_pg:
   caddy_data:
   caddy_config:
+
+secrets:
+  google-sheets-sa.json:
+    file: ./google-sheets-sa.json

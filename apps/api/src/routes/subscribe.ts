@@ -1,4 +1,5 @@
 import { Router } from "express";
+import logger from "../lib/logger";
 import { subscriptionRateLimitMiddleware } from "../lib/ratelimit";
 import { safetyMiddleware, safetyResponseInterceptor } from "../middleware/safety";
 import { createEmailService } from "../lib/emailService";
@@ -15,6 +16,9 @@ async function persistWaitlistToDatabase(
   consentTimestamp: Date,
   clientIp: string | undefined
 ): Promise<"created" | "exists"> {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is not set (required for Postgres fallback)");
+  }
   const existing = await prisma.emailSubscription.findUnique({ where: { email } });
   if (existing) return "exists";
 
@@ -85,7 +89,10 @@ router.post("/", async (req, res) => {
           timestamp: consentTimestamp,
         });
       } catch (sheetsErr) {
-        console.error("Google Sheets waitlist write failed, falling back to database:", sheetsErr);
+        logger.error(
+          "Google Sheets waitlist write failed, falling back to database:",
+          sheetsErr instanceof Error ? sheetsErr.message : sheetsErr
+        );
         outcome = await persistWaitlistToDatabase(email, consentGiven, consentTimestamp, clientIp);
       }
     } else {
@@ -106,7 +113,7 @@ router.post("/", async (req, res) => {
 
     const emailService = createEmailService();
     emailService.sendConfirmationEmail(email).catch((error) => {
-      console.error("Failed to send confirmation email:", error);
+      logger.error("Failed to send confirmation email:", error);
     });
 
     emailService
@@ -129,7 +136,7 @@ router.post("/", async (req, res) => {
       `,
       })
       .catch((error) => {
-        console.error("Failed to send admin notification email:", error);
+        logger.error("Failed to send admin notification email:", error);
       });
 
     res.json({
@@ -137,7 +144,7 @@ router.post("/", async (req, res) => {
       message: "Thanks! We'll email you product updates.",
     });
   } catch (e) {
-    console.error("Subscription error:", e);
+    logger.error("Subscription error:", e);
     res.status(500).json({ success: false, message: "Something went wrong. Please try again later." });
   }
 });

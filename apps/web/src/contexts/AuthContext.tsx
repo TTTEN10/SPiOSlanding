@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useWallet } from './WalletContext';
+import { getApiBaseUrl } from '../config/api'
 
 // Use empty string when not set: same-origin requests use Vite proxy (dev) or Caddy (prod)
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE_URL = getApiBaseUrl()
 
 /**
  * High-level product mode for chat and persistence.

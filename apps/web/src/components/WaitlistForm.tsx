@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import { useOffline } from '../hooks/useOffline'
 import { useToast } from '../hooks/useToast'
 import { fetchWithErrorHandling, getActionableErrorMessage } from '../utils/errorMessages'
 import { offlineQueue } from '../utils/queueManager'
+import { apiUrl } from '../config/api'
 
 interface SignupResponse {
   success: boolean
   message: string
-}
-
-function getApiBase(): string {
-  // Production should be same-origin for CSP safety.
-  if (import.meta.env.PROD) return '/api'
-  return (import.meta.env.VITE_API_URL as string | undefined) || '/api'
 }
 
 function isValidEmail(email: string): boolean {
@@ -86,13 +80,12 @@ export default function WaitlistForm({
   }
 
   const submit = async () => {
-    const apiBase = getApiBase()
     const payload = {
       email: formData.email.trim().toLowerCase(),
       consentGiven: true,
     }
 
-    const url = `${apiBase}/subscribe`
+    const url = apiUrl('/subscribe')
 
     if (isOffline) {
       offlineQueue.add(url, {
@@ -200,21 +193,8 @@ export default function WaitlistForm({
                 className="mt-1 w-5 h-5 text-primary-600 border-2 border-neutral-300 rounded focus:ring-primary-500 focus:ring-2 disabled:opacity-50 min-w-[20px] min-h-[20px]"
               />
               <label htmlFor="consentGiven" className="text-xs sm:text-sm text-body leading-relaxed">
-                I consent to SafePsy collecting and processing my personal data for the purpose of joining the waitlist and
-                receiving product updates. I have read and agree to the{' '}
-                <Link to="/tos" className="text-primary-600 hover:text-primary-700 underline font-medium break-words" target="_blank" rel="noopener noreferrer">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link
-                  to="/sap-policy"
-                  className="text-primary-600 hover:text-primary-700 underline font-medium break-words"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Security and Privacy Policy
-                </Link>
-                . *
+                I consent to SafePsy collecting and processing my personal data for the purpose of joining the waitlist and receiving product updates.
+                I have read and agree to the Terms of Service and Security and Privacy Policy. *
               </label>
             </div>
           </div>

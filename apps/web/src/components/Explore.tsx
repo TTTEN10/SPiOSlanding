@@ -5,6 +5,7 @@ import Header from './Header'
 import Footer from './Footer'
 import { FAQ_ITEMS } from '../data/faq'
 import FAQAccordion from './FAQAccordion'
+import WaitlistForm from './WaitlistForm'
 
 const Explore: React.FC = () => {
   const navigate = useNavigate()
@@ -47,6 +48,11 @@ const Explore: React.FC = () => {
                 </p>
                 <p className="text-body leading-relaxed pt-2 font-medium text-heading">
                   You own your data. We do not store it with third parties or use it to train AI models.
+                </p>
+                <p className="text-body leading-relaxed text-sm pt-4 max-w-3xl mx-auto">
+                  SafePsy is a privacy-first AI therapy chatbot that provides secure mental wellness support through Dr. Safe.
+                  Built for individuals seeking reflection between therapy sessions, exploring emotions for the first time, or
+                  practicing coping tools in a completely private environment.
                 </p>
               </div>
             </div>
@@ -146,6 +152,9 @@ const Explore: React.FC = () => {
               <p className="text-base sm:text-lg text-body mb-6 sm:mb-8 max-w-2xl mx-auto stagger-item">
                 Join our waitlist to be among the first to experience privacy-first mental wellness support.
               </p>
+              <div className="max-w-3xl mx-auto mb-8 sm:mb-10">
+                <WaitlistForm title="Join the SafePsy waitlist" subtitle="Get product updates and early access as we launch." />
+              </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center stagger-item">
                 <button
                   onClick={() => navigate('/')}

@@ -17,10 +17,17 @@ export class OfflineQueueManager {
   private queue: QueuedAction[] = [];
 
   constructor() {
-    this.loadQueue();
+    // SSR/prerender: localStorage doesn't exist. We'll start with an empty queue.
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      this.loadQueue();
+    }
   }
 
   private loadQueue() {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      this.queue = [];
+      return;
+    }
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -33,6 +40,9 @@ export class OfflineQueueManager {
   }
 
   private saveQueue() {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return;
+    }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.queue));
     } catch (error) {

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Shield, CheckCircle, AlertCircle, Loader2, Plus, RefreshCw } from 'lucide-react';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { apiUrl } from '../config/api'
 
 interface DIDInfo {
   hasDid: boolean;
@@ -49,7 +48,7 @@ export default function DIDManager() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/did/info`, {
+      const response = await fetch(apiUrl('/did/info'), {
         method: 'GET',
         headers,
         credentials: 'include',
@@ -97,7 +96,7 @@ export default function DIDManager() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/did/create`, {
+      const response = await fetch(apiUrl('/did/create'), {
         method: 'POST',
         headers,
         credentials: 'include',

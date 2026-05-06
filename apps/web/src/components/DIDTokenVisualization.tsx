@@ -6,6 +6,7 @@ import { getDIDProfile } from '../utils/did-contract';
 import { decryptChatHistory } from '../utils/did-encryption';
 import { useChatEncryption } from '../hooks/useChatEncryption';
 import { toEthersReadProvider } from '../utils/ethers-helpers';
+import { apiUrl } from '../config/api'
 
 interface DIDTokenVisualizationProps {
   className?: string;
@@ -52,8 +53,7 @@ export default function DIDTokenVisualization({ className = '' }: DIDTokenVisual
             headers['Authorization'] = `Bearer ${token}`;
           }
 
-          const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-          const response = await fetch(`${API_BASE_URL}/api/chat/load`, {
+          const response = await fetch(apiUrl('/chat/load'), {
             method: 'GET',
             headers,
             credentials: 'include',

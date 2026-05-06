@@ -122,6 +122,7 @@ apps/api/
 │   │   ├── chat-completions.ts # Shared mount for OpenAI-style completions (used by chat + beta) — TypeScript
 │   │   ├── chat.ts           # Chat: completions, upstream-status, history, streaming — TypeScript
 │   │   ├── contact.ts        # Contact form submit — TypeScript
+│   │   ├── feedback.ts       # User feedback submit (POST /api/feedback) — TypeScript
 │   │   ├── did.ts            # DID: register, metadata, services, verify; POST /api/did/update (auth, prepares updateChatReference calldata) — TypeScript
 │   │   ├── payment.ts        # Payment & pricing — TypeScript
 │   │   ├── rag.ts            # RAG: ingest, query, document delete, health — TypeScript
@@ -228,23 +229,28 @@ apps/web/
 ├── env.example               # Frontend env template — Text
 ├── tsconfig.json             # TypeScript config — JSON
 ├── tsconfig.node.json        # Node/TS config for Vite — JSON
-├── vite.config.ts            # Vite config — TypeScript
-├── vite.config.d.ts          # Vite config types — TypeScript
+├── vite.config.js            # Vite config (dev proxy + port; build settings) — JavaScript
 ├── vitest.config.ts          # Vitest config — TypeScript
 ├── tailwind.config.ts        # Tailwind config — TypeScript
 ├── postcss.config.cjs        # PostCSS config — JavaScript
 ├── .eslintrc.cjs             # ESLint config — JavaScript
 ├── public/                   # Static assets (favicon, sitemap, robots, marketing imagery); `.well-known/apple-app-site-association` + README for iOS Universal Links — mixed
+│   ├── llms.txt              # AI crawler summary / citation-friendly overview — Markdown
 ├── scripts/
+│   ├── generate-aasa.mjs     # CLI: generate AASA from APPLE_TEAM_ID (+ bundle id) — JavaScript (ESM)
+│   ├── prerender.mjs         # Build step: prerender/emit SSR HTML + SEO head — JavaScript (ESM)
 │   └── validate-aasa.mjs     # CLI: fetch AASA, check status/JSON/redirects — JavaScript (ESM)
 ├── src/
-│   ├── main.tsx              # React entry, root render — TypeScript (TSX)
+│   ├── entry-client.tsx      # Client entry: createBrowserRouter + hydrate/render — TypeScript (TSX)
+│   ├── entry-server.tsx      # SSR entry for prerender/SEO injection — TypeScript (TSX)
+│   ├── router.tsx            # Shared route map (browser + SSR) — TypeScript (TSX)
 │   ├── App.tsx               # Router, routes, Theme/Wallet/Auth providers, SEO — TypeScript (TSX)
 │   ├── styles.css            # Global styles — CSS
 │   ├── vite-env.d.ts         # Vite env types — TypeScript
 │   ├── polyfills.ts          # Browser polyfills (buffer, etc.) — TypeScript
 │   │
 │   ├── config/
+│   │   ├── api.ts            # API base URL normalization + helper `apiUrl()` — TypeScript
 │   │   ├── seo.ts            # SEO config (meta, titles) — TypeScript
 │   │   └── supportedChain.ts # Supported EVM chain ids / network config — TypeScript
 │   │
@@ -307,7 +313,7 @@ apps/web/
 │   │   ├── Header.tsx             # Site header/nav — TypeScript (TSX)
 │   │   ├── Hero.tsx               # Landing hero — TypeScript (TSX)
 │   │   ├── HiddenPage.tsx         # Hidden/utility page — TypeScript (TSX)
-│   │   ├── Landing.tsx            # Main landing (`/`); “Explore” CTA → `/explore` — TypeScript (TSX)
+│   │   ├── Landing.tsx            # Main landing (`/`); primary CTAs to `/explore` and `/beta/chat` — TypeScript (TSX)
 │   │   ├── LoadingSpinner.tsx     # Loading spinner — TypeScript (TSX)
 │   │   ├── Maintenance.tsx        # Maintenance page — TypeScript (TSX)
 │   │   ├── NotFound.tsx           # 404 page — TypeScript (TSX)
@@ -489,6 +495,8 @@ deployment/
 ├── on-app-server-recover.sh           # On-server recovery steps — Shell
 ├── verify-production.sh               # Production verification — Shell
 ├── test-llm-route-from-app.sh         # SSH to app host; curl vLLM /v1/models — Shell
+├── DEPLOYMENT_INSTRUCTIONS.md         # Human-readable production deploy notes (Docker + Caddy) — Markdown
+├── fix-production.sh                  # Repair script for production (one-off ops helper) — Shell
 ├── logrotate-app-monitor.example      # Logrotate sample for monitor — Text
 ├── app-server-monitor/
 │   └── monitor.sh                     # Host monitor script — Shell

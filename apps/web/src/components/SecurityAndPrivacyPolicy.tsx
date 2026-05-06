@@ -782,6 +782,19 @@ const SecurityAndPrivacyPolicy: React.FC = () => {
                   Data Categories & Processing
                 </span>
               </h2>
+
+              <div className="max-w-5xl mx-auto mb-8 px-4 rounded-2xl border border-neutral-200 dark:border-white/20 bg-white/60 dark:bg-black/20 p-6 text-left">
+                <h3 className="text-xl text-heading font-semibold mb-3">Waitlist and product updates (email collection)</h3>
+                <p className="text-body text-sm sm:text-base mb-3">
+                  When you join the waitlist, SafePsy processes your email address and a record of your consent (including a timestamp) to register your request and send you product updates.
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-body text-sm sm:text-base ml-4">
+                  <li><strong>Purpose:</strong> waitlist registration and product updates</li>
+                  <li><strong>Legal basis:</strong> consent (you can withdraw at any time via unsubscribe or by contacting us)</li>
+                  <li><strong>Storage:</strong> waitlist entries are stored in our operational systems (e.g. database and/or a managed spreadsheet used for waitlist operations)</li>
+                  <li><strong>Retention:</strong> until you withdraw consent or the waitlist is no longer needed, unless a longer retention is required by law</li>
+                </ul>
+              </div>
               
               <div className="overflow-x-auto -mx-4 sm:mx-0">
                 <div className="inline-block min-w-full align-middle">
@@ -824,6 +837,12 @@ const SecurityAndPrivacyPolicy: React.FC = () => {
                         <td className="border border-neutral-300 dark:border-gray-600 px-3 sm:px-4 py-2 sm:py-3 text-body text-xs sm:text-sm">Platform security, optimization, and security audit logs (redacted identifiers only)</td>
                         <td className="border border-neutral-300 dark:border-gray-600 px-3 sm:px-4 py-2 sm:py-3 text-body text-xs sm:text-sm">12 months</td>
                         <td className="border border-neutral-300 dark:border-gray-600 px-3 sm:px-4 py-2 sm:py-3 text-body text-xs sm:text-sm">Legitimate Interests</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-neutral-300 dark:border-gray-600 px-3 sm:px-4 py-2 sm:py-3 text-body text-xs sm:text-sm">Waitlist Data</td>
+                        <td className="border border-neutral-300 dark:border-gray-600 px-3 sm:px-4 py-2 sm:py-3 text-body text-xs sm:text-sm">Waitlist registration and product updates</td>
+                        <td className="border border-neutral-300 dark:border-gray-600 px-3 sm:px-4 py-2 sm:py-3 text-body text-xs sm:text-sm">Until withdrawal of consent or waitlist ends</td>
+                        <td className="border border-neutral-300 dark:border-gray-600 px-3 sm:px-4 py-2 sm:py-3 text-body text-xs sm:text-sm">Consent</td>
                       </tr>
                     </tbody>
                   </table>

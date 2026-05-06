@@ -175,3 +175,15 @@ model SecurityAuditLog {
   @@index([createdAt])
   @@map("security_audit_logs")
 }
+
+model Feedback {
+  id          String   @id @default(cuid())
+  email       String?  // Optional - users can submit anonymous feedback
+  feedback    String   // The feedback content
+  ipHash      String?  // Hashed IP for rate limiting
+  userAgent   String?  // Browser info for debugging
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("feedback")
+}

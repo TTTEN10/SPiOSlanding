@@ -4,8 +4,7 @@ import { useWallet } from '../contexts/WalletContext';
 import { SUPPORTED_CHAIN_ID } from '../config/supportedChain';
 import { Wallet, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { ethers } from 'ethers';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { apiUrl } from '../config/api'
 
 interface PricingTier {
   name: string;
@@ -54,7 +53,7 @@ export default function Payment() {
 
   const loadPricing = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/payment/pricing`);
+      const response = await fetch(apiUrl('/payment/pricing'));
       const data = await response.json();
       if (data.success) {
         setPricing(data.data);
@@ -70,7 +69,7 @@ export default function Payment() {
     if (!authState.isVerified) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/payment/subscription`, {
+      const response = await fetch(apiUrl('/payment/subscription'), {
         credentials: 'include',
         headers: {
           'x-wallet-address': wallet?.address || '',
@@ -97,7 +96,7 @@ export default function Payment() {
 
     try {
       // Get payment recipient address and amount
-      const pricingResponse = await fetch(`${API_BASE_URL}/api/payment/pricing`);
+      const pricingResponse = await fetch(apiUrl('/payment/pricing'));
       const pricingData = await pricingResponse.json();
       
       if (!pricingData.success) {
@@ -160,7 +159,7 @@ export default function Payment() {
       
       if (receipt.status === 1) {
         // Transaction confirmed, process payment
-        const paymentResponse = await fetch(`${API_BASE_URL}/api/payment/crypto`, {
+        const paymentResponse = await fetch(apiUrl('/payment/crypto'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -16,8 +16,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useToast } from '../hooks/useToast';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { apiUrl } from '../config/api'
 
 interface DIDProfileData {
   hasDid: boolean;
@@ -83,7 +82,7 @@ export default function DIDProfile() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/did/info`, {
+      const response = await fetch(apiUrl('/did/info'), {
         method: 'GET',
         headers,
         credentials: 'include',
@@ -129,7 +128,7 @@ export default function DIDProfile() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/did/export`, {
+      const response = await fetch(apiUrl('/did/export'), {
         method: 'GET',
         headers,
         credentials: 'include',
@@ -191,7 +190,7 @@ export default function DIDProfile() {
       }
 
       // First, get revocation instructions from backend
-      const response = await fetch(`${API_BASE_URL}/api/did/revoke`, {
+      const response = await fetch(apiUrl('/did/revoke'), {
         method: 'POST',
         headers,
         credentials: 'include',

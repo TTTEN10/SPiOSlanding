@@ -25,7 +25,7 @@ export default function Landing() {
           <div className="pointer-events-none absolute top-64 -right-24 w-72 h-72 rounded-full bg-secondary-400/20 blur-3xl animate-pulse" />
 
           <section className="mb-6 scroll-reveal" data-reveal>
-            <div className="max-w-5xl mx-auto bg-white/70 dark:bg-black/30 backdrop-blur-sm rounded-3xl border border-neutral-dark/20 dark:border-white/20 p-6 sm:p-8 lg:p-12 hover-soft-fade">
+            <div className="max-w-5xl mx-auto bg-white/70 dark:bg-black/30 backdrop-blur-sm rounded-3xl border border-neutral-dark/20 dark:border-white/20 p-6 sm:p-8 lg:p-12 hover-soft-fade text-center">
               <p className="inline-flex items-center gap-2 text-sm sm:text-base text-heading mb-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700 rounded-full px-4 py-2">
                 <Sparkles className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 Private reflection · You-first onboarding
@@ -35,17 +35,15 @@ export default function Landing() {
                   SafePsy - AI Therapy Platform for Private Mental Wellness
                 </span>
               </h1>
-              <div className="mt-6 max-w-3xl space-y-4 text-base sm:text-lg text-body leading-relaxed whitespace-normal break-words [text-wrap:pretty]">
+              <div className="mt-6 max-w-3xl mx-auto space-y-4 text-base sm:text-lg text-body leading-relaxed whitespace-normal break-words [text-wrap:pretty]">
                 <p>
-                  SafePsy is a privacy-first AI therapy chatbot for secure, judgment-free support with Dr. Safe. Chat instantly as a guest—no
-                  sign-in—or use decentralized identity to unlock encrypted conversation history that only you control.
+                  SafePsy is a privacy-first AI therapy chatbot for secure, judgment-free support with Dr. Safe. Chat instantly as a guest—no sign-in—or use decentralized identity to unlock encrypted conversation history that only you control.
                 </p>
                 <p>
-                  We never train on your conversations. Guest chats stay in your browser. With decentralized identity, only unreadable ciphertext
-                  is stored—your keys stay with you, never on our servers.
+                  We never train on your conversations. Guest chats stay in your browser. With decentralized identity, only unreadable ciphertext is stored—your keys stay with you, never on our servers.
                 </p>
               </div>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
                 <Link to="/beta/chat" className="btn-try-beta" aria-label="Start talking with Dr. Safe, no login">
                   Start talking (no login)
                   <ArrowRight className="w-5 h-5 shrink-0" aria-hidden="true" />
@@ -80,7 +78,7 @@ export default function Landing() {
               </div>
               <div className="p-6 rounded-2xl border border-neutral-200 dark:border-white/20 bg-white/70 dark:bg-black/20 hover-soft-fade">
                 <Heart className="w-7 h-7 text-secondary-600 dark:text-secondary-400 mb-3" />
-                <p className="text-body text-sm sm:text-base"><strong className="text-heading">Transparency:</strong> DID operations run on Sepolia Testnet; on-chain metadata is public, while chat content is off-chain and encrypted.</p>
+                <p className="text-body text-sm sm:text-base"><strong className="text-heading">Transparency:</strong> Decentralized Identity relies on blockchain; on-chain metadata is public, while chat content is off-chain and encrypted.</p>
               </div>
             </div>
             <p className="max-w-4xl mx-auto text-center text-body mt-6 text-xs sm:text-sm opacity-90">
