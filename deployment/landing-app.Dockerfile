@@ -11,16 +11,21 @@ COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 COPY apps/safepsy-mobile/package.json apps/safepsy-mobile/
 
-RUN npm ci -w safepsy-api -w safepsy-web
+RUN npm ci --workspaces --include-workspace-root --ignore-scripts
 
 COPY apps/api apps/api
 COPY apps/web apps/web
 COPY public public
 
+# Ensure @prisma/client is resolvable next to apps/api/schema.prisma so
+# `prisma generate` doesn't try to fetch it again (npm i fails inside this
+# build environment under hoisted workspace layouts).
+RUN cd apps/api && npm install --no-save --ignore-scripts @prisma/client@6.19.2
+
 RUN npm run db:generate \
   && npm run build:web \
   && npm run build -w safepsy-api \
-  && npm prune --omit=dev
+  && npm prune --omit=dev --workspaces --include-workspace-root
 
 FROM node:20-bookworm-slim AS production
 WORKDIR /app
