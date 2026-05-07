@@ -45,13 +45,6 @@ export default function Landing() {
                   Register
                   <ArrowRight className="w-5 h-5 shrink-0" aria-hidden="true" />
                 </Link>
-                <Link
-                  to="/explore"
-                  className="btn-secondary btn-gentle-scale inline-flex items-center justify-center text-base sm:text-lg px-6"
-                  aria-label="Explore SafePsy"
-                >
-                  Explore
-                </Link>
               </div>
             </div>
           </section>
