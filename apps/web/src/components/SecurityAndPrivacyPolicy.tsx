@@ -8,7 +8,7 @@ const SecurityAndPrivacyPolicy: React.FC = () => {
   const navigate = useNavigate()
   return (
     <div className="min-h-screen flex flex-col">
-      <Header showBackButton={true} />
+      <Header />
 
       {/* Main Content */}
       <main id="main-content" className="flex-1" role="main" aria-label="Security and Privacy Policy" tabIndex={-1}>

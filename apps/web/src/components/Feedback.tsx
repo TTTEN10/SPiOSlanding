@@ -108,12 +108,12 @@ const Feedback: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header showBackButton={true} />
-      <main id="main-content" className="flex-1 section-padding py-8 lg:py-12" role="main" aria-label="Beta feedback" tabIndex={-1}>
+      <Header />
+      <main id="main-content" className="flex-1 section-padding py-8 lg:py-12" role="main" aria-label="Feedback" tabIndex={-1}>
         <div className="container-max max-w-3xl">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl text-heading mb-4">
             <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-bold">
-              Beta feedback
+              Feedback
             </span>
           </h1>
           <p className="text-body mb-8">

@@ -9,7 +9,7 @@ const Maintenance: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header showBackButton={false} />
+      <Header />
 
       {/* Main Content */}
       <main id="main-content" className="flex-1" role="main" aria-label="Site maintenance" tabIndex={-1}>

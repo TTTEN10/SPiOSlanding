@@ -7,7 +7,7 @@ import FAQAccordion from './FAQAccordion'
 const FAQ: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header showBackButton={true} />
+      <Header />
 
       <main id="main-content" className="flex-1" role="main" aria-label="FAQ" tabIndex={-1}>
         <section className="section-padding py-8 lg:py-12">

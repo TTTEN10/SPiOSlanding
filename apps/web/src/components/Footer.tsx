@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Mail, Instagram, Linkedin, Settings, HelpCircle, LifeBuoy } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import CookieManager from './CookieManager'
 
 const Footer: React.FC = () => {
@@ -13,14 +13,9 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {/* Brand */}
           <div className="space-y-3 sm:space-y-4 sm:col-span-2 md:col-span-2">
-            <a
-              href="https://safepsy.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="h-10 sm:h-12 hover:drop-shadow-lg transition-all duration-300 inline-block group"
-            >
+            <Link to="/" className="h-10 sm:h-12 hover:drop-shadow-lg transition-all duration-300 inline-block group">
               <img src="/LogoTransparent1.png" alt="SafePsy Logo" className="h-10 sm:h-12 transition-transform duration-300 group-hover:scale-105" />
-            </a>
+            </Link>
             <p className="text-text-primary font-titillium font-regular text-base sm:text-[1.1em]">
               Mental Health, Rebuilt on Privacy
             </p>
@@ -117,15 +112,6 @@ const Footer: React.FC = () => {
               </button>
               <button 
                 type="button"
-                onClick={() => navigate('/feedback')}
-                className="text-text-primary font-titillium font-regular hover:text-primary-600 transition-all duration-300 text-left block w-full min-h-[36px] py-0.5 text-sm sm:text-base leading-tight group hover:scale-105 active:scale-95"
-              >
-                <span className="text-black dark:text-white link-hover block w-full text-left">
-                  Beta feedback
-                </span>
-              </button>
-              <button 
-                type="button"
                 onClick={() => setIsCookieManagerOpen(true)}
                 className="flex w-full items-center gap-2 text-text-primary font-titillium font-regular hover:text-primary-600 transition-all duration-300 text-left min-h-[36px] py-0.5 text-sm sm:text-base leading-tight group hover:scale-105 active:scale-95"
               >
@@ -140,7 +126,7 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-text-primary/20 dark:border-white/20 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center space-y-2">
           <p className="text-text-primary text-xs sm:text-sm font-noto font-light px-4">
-            Built with privacy, security, and human-centered design.
+            Built for privacy and security.
           </p>
           <p className="text-text-primary text-xs sm:text-sm font-titillium font-regular px-4">
             © 2026 SafePsy. All rights reserved.

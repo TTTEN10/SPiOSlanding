@@ -31,7 +31,7 @@ const HiddenPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header showBackButton={true} />
+      <Header />
 
       {/* Skip to main content link (accessibility) */}
       <a 

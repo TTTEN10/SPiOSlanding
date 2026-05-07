@@ -7,7 +7,7 @@ import Footer from './Footer'
 const Cookies: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header showBackButton={true} />
+      <Header />
 
       {/* Main Content */}
       <main id="main-content" className="flex-1" role="main" aria-label="Cookie Policy" tabIndex={-1}>
