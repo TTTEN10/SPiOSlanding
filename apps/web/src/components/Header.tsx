@@ -21,15 +21,6 @@ const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Desktop nav (simple links) */}
-          <nav className="hidden md:flex items-center gap-2">
-            {!showTryBeta && (
-              <Link to="/explore" className="px-3 py-2 rounded-lg text-sm text-body hover:text-heading hover:bg-gray-50 dark:hover:bg-neutral-900/50 transition-colors">
-                Explore
-              </Link>
-            )}
-          </nav>
-
           {/* Primary action (desktop & mobile) */}
           {showTryBeta ? (
             <Link to="/register" className="btn-try-beta" aria-label="Go to SafePsy registration">
